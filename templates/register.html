@@ -3,8 +3,11 @@
 {% block content %}
 <h2>Kayıt Formu</h2>
 <form method="POST">
-  Kullanıcı Adı: <input name="username"><br>
-  Şifre: <input name="password" type="password"><br>
+  Kullanıcı Adı: <input name="username" required><br><br>
+  Şifre: <input name="password" type="password" required><br><br>
+  Adınız: <input name="name"><br><br>
+  Yaş: <input name="age" type="number"><br><br>
+  Burç / Tercihler: <input name="preferences"><br><br>
   <button type="submit">Kayıt Ol</button>
 </form>
 {% endblock %}
