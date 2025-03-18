@@ -13,8 +13,8 @@ app.secret_key = "dev_secret_key"  # Production'da environment variable kullan
 # 1) VERITABANI AYARI
 # --------------------------------------
 db_url = os.environ.get("DATABASE_URL", "postgresql://postgres:932653@localhost:5432/my_flask_db")
+db_url = db_url.strip().lstrip("=")  # Başındaki boşluk ve '=' işaretini temizler.
 
-# Eğer URL "postgres://" veya "postgresql://" ile başlıyor ancak "+psycopg2" içermiyorsa, dönüştür.
 if db_url.startswith("postgres://"):
     db_url = db_url.replace("postgres://", "postgresql+psycopg2://", 1)
 elif db_url.startswith("postgresql://") and not db_url.startswith("postgresql+"):
@@ -22,6 +22,7 @@ elif db_url.startswith("postgresql://") and not db_url.startswith("postgresql+")
 
 app.config["SQLALCHEMY_DATABASE_URI"] = db_url
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+
 
 
 db = SQLAlchemy(app)
