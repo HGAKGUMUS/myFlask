@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}Giriş Yap{% endblock %}
+{% block content %}
+<h2>Giriş Formu</h2>
+<form method="POST">
+  Kullanıcı Adı: <input name="username"><br>
+  Şifre: <input name="password" type="password"><br>
+  <button type="submit">Giriş Yap</button>
+</form>
+{% endblock %}

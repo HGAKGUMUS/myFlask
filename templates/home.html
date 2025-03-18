@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}Ana Sayfa{% endblock %}
+
+{% block content %}
+<h2>Hoş Geldin, {{ username }}!</h2>
+{% if user_id %}
+  <p>Kullanıcı ID: {{ user_id }}</p>
+  <p><a href="{{ url_for('logout') }}">Çıkış Yap</a></p>
+{% else %}
+  <p>Ziyaretçi olarak geziniyorsunuz.</p>
+{% endif %}
+{% endblock %}
