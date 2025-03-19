@@ -2,12 +2,46 @@
 {% block title %}Kayıt Ol{% endblock %}
 {% block content %}
 <h2>Kayıt Formu</h2>
+{% with messages = get_flashed_messages() %}
+  {% if messages %}
+    <ul>
+      {% for message in messages %}
+        <li>{{ message }}</li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+{% endwith %}
 <form method="POST">
   Kullanıcı Adı: <input name="username" required><br><br>
-  Şifre: <input name="password" type="password" required><br><br>
+  Şifre: <input name="password" type="password" required>
+  <small>Şifre 8 karakter olmalı ve en az 1 büyük harf, 1 küçük harf, 1 rakam içermelidir.</small><br><br>
   Adınız: <input name="name"><br><br>
+  Burç:
+  <select name="zodiac">
+    <option value="">Seçiniz</option>
+    <option value="Koç">Koç</option>
+    <option value="Boğa">Boğa</option>
+    <option value="İkizler">İkizler</option>
+    <option value="Yengeç">Yengeç</option>
+    <option value="Aslan">Aslan</option>
+    <option value="Başak">Başak</option>
+    <option value="Terazi">Terazi</option>
+    <option value="Akrep">Akrep</option>
+    <option value="Yay">Yay</option>
+    <option value="Oğlak">Oğlak</option>
+    <option value="Kova">Kova</option>
+    <option value="Balık">Balık</option>
+  </select><br><br>
   Yaş: <input name="age" type="number"><br><br>
-  Burç / Tercihler: <input name="preferences"><br><br>
+  Şehir:
+  <select name="city">
+    <option value="">Seçiniz</option>
+    <option value="Istanbul">Istanbul</option>
+    <option value="Ankara">Ankara</option>
+    <option value="Izmir">Izmir</option>
+    <!-- Diğer şehirler eklenebilir -->
+  </select><br><br>
+  İlçe: <input name="district"><br><br>
   <button type="submit">Kayıt Ol</button>
 </form>
 {% endblock %}

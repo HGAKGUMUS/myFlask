@@ -3,9 +3,19 @@
 
 {% block content %}
 <h2>Hoş Geldin, {{ username }}!</h2>
+{% with messages = get_flashed_messages() %}
+  {% if messages %}
+    <ul>
+      {% for message in messages %}
+        <li>{{ message }}</li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+{% endwith %}
 {% if user_id %}
   <p>Kullanıcı ID: {{ user_id }}</p>
   <p><a href="{{ url_for('logout') }}">Çıkış Yap</a></p>
+  <p><a href="{{ url_for('sports') }}">Spor Programları</a></p>
 {% else %}
   <p>Ziyaretçi olarak geziniyorsunuz.</p>
 {% endif %}

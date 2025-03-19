@@ -2,9 +2,18 @@
 {% block title %}Giriş Yap{% endblock %}
 {% block content %}
 <h2>Giriş Formu</h2>
+{% with messages = get_flashed_messages() %}
+  {% if messages %}
+    <ul>
+      {% for message in messages %}
+        <li>{{ message }}</li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+{% endwith %}
 <form method="POST">
-  Kullanıcı Adı: <input name="username"><br>
-  Şifre: <input name="password" type="password"><br>
+  Kullanıcı Adı: <input name="username" required><br><br>
+  Şifre: <input name="password" type="password" required><br><br>
   <button type="submit">Giriş Yap</button>
 </form>
 {% endblock %}
