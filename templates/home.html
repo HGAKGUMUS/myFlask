@@ -1,22 +1,16 @@
 {% extends "base.html" %}
 {% block title %}Ana Sayfa{% endblock %}
-
 {% block content %}
-<h2>Hoş Geldin, {{ username }}!</h2>
-{% with messages = get_flashed_messages() %}
-  {% if messages %}
-    <ul>
-      {% for message in messages %}
-        <li>{{ message }}</li>
-      {% endfor %}
-    </ul>
+<div class="jumbotron mt-4">
+  <h1 class="display-4">Hoş Geldin, {{ username }}!</h1>
+  {% if session.get("user_id") %}
+    <p class="lead">Kullanıcı ID: {{ user_id }}</p>
+    <a class="btn btn-primary btn-lg" href="{{ url_for('logout') }}" role="button">Çıkış Yap</a>
+    <a class="btn btn-secondary btn-lg" href="{{ url_for('sports') }}" role="button">Spor Programları</a>
+  {% else %}
+    <p class="lead">Ziyaretçi olarak geziniyorsunuz.</p>
+    <a class="btn btn-primary btn-lg" href="{{ url_for('login') }}" role="button">Giriş Yap</a>
+    <a class="btn btn-secondary btn-lg" href="{{ url_for('register') }}" role="button">Kayıt Ol</a>
   {% endif %}
-{% endwith %}
-{% if user_id %}
-  <p>Kullanıcı ID: {{ user_id }}</p>
-  <p><a href="{{ url_for('logout') }}">Çıkış Yap</a></p>
-  <p><a href="{{ url_for('sports') }}">Spor Programları</a></p>
-{% else %}
-  <p>Ziyaretçi olarak geziniyorsunuz.</p>
-{% endif %}
+</div>
 {% endblock %}

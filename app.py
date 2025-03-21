@@ -1,19 +1,18 @@
 import os
 import re
 from datetime import datetime
-from flask import Flask, request, session, render_template, redirect, url_for, flash
+from flask import Flask, request, session, render_template, redirect, url_for, flash, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
-app.secret_key = "dev_secret_key"  # Production'da environment variable kullanın
+app.secret_key = "dev_secret_key"  # Üretimde environment variable kullanın
 
 # --------------------------------------
-# 1) VERITABANI AYARI
+# 1) VERİTABANI AYARI
 # --------------------------------------
 db_url = os.environ.get("DATABASE_URL", "postgresql://postgres:932653@localhost:5432/my_flask_db")
 db_url = db_url.strip().lstrip("=")
-
 if db_url.startswith("postgres://"):
     db_url = db_url.replace("postgres://", "postgresql+psycopg2://", 1)
 elif db_url.startswith("postgresql://") and not db_url.startswith("postgresql+"):
@@ -21,44 +20,72 @@ elif db_url.startswith("postgresql://") and not db_url.startswith("postgresql+")
 
 app.config["SQLALCHEMY_DATABASE_URI"] = db_url
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-
 db = SQLAlchemy(app)
 
 # --------------------------------------
 # 2) MODELLER (Tablolar)
 # --------------------------------------
+
+# Kullanıcı temel bilgileri (login vs için)
 class User(db.Model):
     __tablename__ = "users"
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(50), unique=True, nullable=False)
+    email = db.Column(db.String(100), unique=True, nullable=False)
     password = db.Column(db.String(200), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    # Kullanıcı profili ile bire bir ilişki
+    profile = db.relationship("UserProfile", uselist=False, backref="user")
+
+# Kullanıcıya ait detaylı profil bilgileri
+class UserProfile(db.Model):
+    __tablename__ = "user_profiles"
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), primary_key=True)
     name = db.Column(db.String(100))
-    zodiac = db.Column(db.String(50))    # Burç bilgisi
+    zodiac = db.Column(db.String(50))
     age = db.Column(db.Integer)
-    city = db.Column(db.String(100))       # Şehir
-    district = db.Column(db.String(100))   # İlçe
+    gender = db.Column(db.String(10))
+    height = db.Column(db.Numeric(5,2))
+    weight = db.Column(db.Numeric(5,2))
+    experience_level = db.Column(db.String(20))
+    goals = db.Column(db.Text)
+    city_id = db.Column(db.Integer, db.ForeignKey("cities.city_id"))
+    district_id = db.Column(db.Integer, db.ForeignKey("districts.district_id"))
 
-    def __init__(self, username, password, name=None, zodiac=None, age=None, city=None, district=None):
-        self.username = username
-        self.password = password
-        self.name = name
-        self.zodiac = zodiac
-        self.age = age
-        self.city = city
-        self.district = district
+# Şehir tablosu
+class City(db.Model):
+    __tablename__ = "cities"
+    city_id = db.Column(db.Integer, primary_key=True)
+    city_name = db.Column(db.String(100), nullable=False)
+    districts = db.relationship("District", backref="city", lazy=True)
 
+# İlçe tablosu
+class District(db.Model):
+    __tablename__ = "districts"
+    district_id = db.Column(db.Integer, primary_key=True)
+    city_id = db.Column(db.Integer, db.ForeignKey("cities.city_id"), nullable=False)
+    district_name = db.Column(db.String(100), nullable=False)
+
+# Spor kategorileri (örneğin: Futbol, Basketbol vs.)
 class Category(db.Model):
     __tablename__ = "categories"
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), unique=True, nullable=False)
 
+# Spor programı bilgileri
 class Program(db.Model):
     __tablename__ = "programs"
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), unique=True, nullable=False)
     category_id = db.Column(db.Integer, db.ForeignKey('categories.id'), nullable=False)
+    level = db.Column(db.String(20))  # "Basic" veya "Advanced"
+    exercise_steps = db.Column(db.Text)  # Adım adım açıklamalar
+    duration = db.Column(db.Integer)      # Dakika cinsinden
+    rest_intervals = db.Column(db.Text)
+    notes = db.Column(db.Text)
     category = db.relationship('Category', backref=db.backref('programs', lazy=True))
 
+# İzleme logları
 class WatchLog(db.Model):
     __tablename__ = "watch_logs"
     id = db.Column(db.Integer, primary_key=True)
@@ -72,7 +99,6 @@ class WatchLog(db.Model):
 # Şifre Validasyonu
 # --------------------------------------
 def validate_password(pw):
-    # Şifre tam olarak 8 karakter olmalı; eğer minimum 8 karakter isteniyorsa len(pw) < 8 şeklinde değiştirin.
     if len(pw) != 8:
         return False
     if not re.search(r'[A-Z]', pw):
@@ -84,95 +110,140 @@ def validate_password(pw):
     return True
 
 # --------------------------------------
-# 3) TABLOLARI OLUŞTURMA ve Spor Kategorileri Ekleme
+# Tabloları Oluşturma ve Örnek Veriler Ekleme
 # --------------------------------------
 def create_tables():
     db.create_all()
-    if not Category.query.first():
-        # Spor dalları listesini oluşturun (örneğin 18 tane; isterseniz genişletebilirsiniz)
-        sports_categories = [
-            "Futbol", "Basketbol", "Tenis", "Yüzme", "Yoga", "Fitness", "Okçuluk",
-            "At Yarışı", "Güreş", "Boks", "Kickbox", "Koşu", "Voleybol",
-            "Motor Sporları", "E-Spor", "Atletizm", "Bale", "Bilardo"
+
+    # Şehirler ve ilçeler (örnek veriler)
+    if not City.query.first():
+        cities = [
+            City(city_name="Istanbul"),
+            City(city_name="Ankara"),
+            City(city_name="Izmir")
         ]
-        categories = []
+        db.session.add_all(cities)
+        db.session.commit()
+        istanbul = City.query.filter_by(city_name="Istanbul").first()
+        ankara = City.query.filter_by(city_name="Ankara").first()
+        izmir = City.query.filter_by(city_name="Izmir").first()
+        districts = [
+            District(city_id=istanbul.city_id, district_name="Kadıköy"),
+            District(city_id=istanbul.city_id, district_name="Beşiktaş"),
+            District(city_id=ankara.city_id, district_name="Çankaya"),
+            District(city_id=ankara.city_id, district_name="Keçiören"),
+            District(city_id=izmir.city_id, district_name="Bornova"),
+            District(city_id=izmir.city_id, district_name="Karşıyaka")
+        ]
+        db.session.add_all(districts)
+        db.session.commit()
+
+    # Spor kategorileri ve programları
+    if not Category.query.first():
+        sports_categories = ["Futbol", "Basketbol", "Tenis", "Yüzme", "Yoga", "Fitness", "Boks", "Koşu"]
         for cat_name in sports_categories:
             cat = Category(name=cat_name)
             db.session.add(cat)
-            categories.append(cat)
         db.session.commit()
-
-        # Her kategori için iki program ekleyelim: Beginner ve Advanced
+        categories = Category.query.all()
         programs = []
         for cat in categories:
-            prog1 = Program(name=f"Beginner {cat.name}", category_id=cat.id)
-            prog2 = Program(name=f"Advanced {cat.name}", category_id=cat.id)
-            programs.extend([prog1, prog2])
+            prog_basic = Program(
+                name=f"Beginner {cat.name}",
+                category_id=cat.id,
+                level="Basic",
+                exercise_steps="1. Isınma; 2. Ana Egzersiz; 3. Soğuma",
+                duration=30,
+                rest_intervals="Set arası 1 dk",
+                notes="Doğru formu koruyun."
+            )
+            prog_advanced = Program(
+                name=f"Advanced {cat.name}",
+                category_id=cat.id,
+                level="Advanced",
+                exercise_steps="1. Uzun ısınma; 2. Yoğun egzersiz; 3. Uzun soğuma",
+                duration=45,
+                rest_intervals="Set arası 1.5 dk",
+                notes="Tekniğe odaklanın."
+            )
+            programs.extend([prog_basic, prog_advanced])
         db.session.add_all(programs)
         db.session.commit()
 
 # --------------------------------------
-# 4) KULLANICI KAYIT (REGISTER)
+# GET İLE İLÇE VERİSİ DÖNDÜRME (AJAX için)
+# --------------------------------------
+@app.route("/get_districts/<int:city_id>")
+def get_districts(city_id):
+    districts = District.query.filter_by(city_id=city_id).all()
+    district_list = [{"district_id": d.district_id, "district_name": d.district_name} for d in districts]
+    return jsonify({"districts": district_list})
+
+# --------------------------------------
+# KULLANICI KAYIT (REGISTER)
 # --------------------------------------
 @app.route("/register", methods=["GET", "POST"])
 def register():
     if request.method == "POST":
-        uname = request.form.get("username")
-        pw = request.form.get("password")
-        real_name = request.form.get("name")
-        age_str = request.form.get("age")
+        username = request.form.get("username")
+        email = request.form.get("email")
+        password = request.form.get("password")
+        name = request.form.get("name")
         zodiac = request.form.get("zodiac")
-        city = request.form.get("city")
-        district = request.form.get("district")
+        age_str = request.form.get("age")
+        city_id = request.form.get("city")
+        district_id = request.form.get("district")
 
-        # Kullanıcı var mı kontrol
-        existing = User.query.filter_by(username=uname).first()
+        existing = User.query.filter_by(username=username).first()
         if existing:
             flash("Bu kullanıcı adı zaten mevcut!")
-            return render_template("register.html")
+            return render_template("register.html", cities=City.query.all())
 
-        # Şifre validasyonu
-        if not validate_password(pw):
+        if not validate_password(password):
             flash("Şifre 8 karakter olmalı ve en az 1 büyük harf, 1 küçük harf, 1 rakam içermelidir.")
-            return render_template("register.html")
+            return render_template("register.html", cities=City.query.all())
 
-        hashed_pw = generate_password_hash(pw)
+        hashed_pw = generate_password_hash(password)
         try:
             age_val = int(age_str) if age_str else None
         except:
             age_val = None
 
-        new_user = User(
-            username=uname,
-            password=hashed_pw,
-            name=real_name,
-            zodiac=zodiac,
-            age=age_val,
-            city=city,
-            district=district
-        )
+        new_user = User(username=username, email=email, password=hashed_pw)
         db.session.add(new_user)
         db.session.commit()
+
+        new_profile = UserProfile(
+            user_id=new_user.id,
+            name=name,
+            zodiac=zodiac,
+            age=age_val,
+            city_id=int(city_id) if city_id else None,
+            district_id=int(district_id) if district_id else None
+        )
+        db.session.add(new_profile)
+        db.session.commit()
+
         flash("Kayıt başarılı! Lütfen giriş yapın.")
         return redirect(url_for("login"))
 
-    return render_template("register.html")
+    cities = City.query.all()
+    return render_template("register.html", cities=cities)
 
 # --------------------------------------
-# 5) KULLANICI GİRİŞ (LOGIN)
+# KULLANICI GİRİŞ (LOGIN)
 # --------------------------------------
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
-        uname = request.form.get("username")
-        pw = request.form.get("password")
+        username = request.form.get("username")
+        password = request.form.get("password")
 
-        user = User.query.filter_by(username=uname).first()
+        user = User.query.filter_by(username=username).first()
         if not user:
             flash("Kullanıcı bulunamadı!")
             return render_template("login.html")
-
-        if check_password_hash(user.password, pw):
+        if check_password_hash(user.password, password):
             session["user_id"] = user.id
             session["username"] = user.username
             flash("Giriş başarılı!")
@@ -180,11 +251,10 @@ def login():
         else:
             flash("Yanlış şifre!")
             return render_template("login.html")
-
     return render_template("login.html")
 
 # --------------------------------------
-# 6) ÇIKIŞ (LOGOUT)
+# ÇIKIŞ (LOGOUT)
 # --------------------------------------
 @app.route("/logout")
 def logout():
@@ -194,82 +264,25 @@ def logout():
     return redirect(url_for("home"))
 
 # --------------------------------------
-# 7) ANA SAYFA (HOME)
+# ANA SAYFA (HOME)
 # --------------------------------------
 @app.route("/")
 def home():
     user_id = session.get("user_id")
     if user_id:
         user = User.query.get(user_id)
-        if user:
-            display_name = user.name if user.name else user.username
-            return render_template("home.html", username=display_name, user_id=user_id, user=user)
-    return render_template("home.html", username=None, user_id=None, user=None)
+        display_name = user.profile.name if user.profile and user.profile.name else user.username
+        return render_template("home.html", username=display_name, user_id=user_id)
+    return render_template("home.html", username="Ziyaretçi", user_id=None)
 
-# --------------------------------------
-# 8) PROGRAM / KATEGORİ GÖRÜNTÜLEME
-# --------------------------------------
-@app.route("/programs")
-def list_programs():
-    progs = Program.query.all()
-    html = "<h2>Spor Programları</h2><ul>"
-    for p in progs:
-        cat_name = p.category.name if p.category else "Bilinmiyor"
-        html += f"<li>{p.name} (Kategori: {cat_name}) [<a href='/watch/{p.id}'>İZLE</a>]</li>"
-    html += "</ul>"
-    return html
-
-# --------------------------------------
-# 9) PROGRAM İZLEME (WATCH)
-# --------------------------------------
-@app.route("/watch/<int:program_id>")
-def watch_program(program_id):
-    user_id = session.get("user_id")
-    if not user_id:
-        flash("Önce giriş yapın!")
-        return redirect(url_for("login"))
-
-    prog = Program.query.get(program_id)
-    if not prog:
-        flash("Program bulunamadı!")
-        return redirect(url_for("list_programs"))
-
-    new_log = WatchLog(user_id=user_id, program_id=program_id)
-    db.session.add(new_log)
-    db.session.commit()
-
-    flash(f"{prog.name} izleniyor...")
-    return redirect(url_for("list_programs"))
-
-# --------------------------------------
-# 10) SPOR PROGRAMLARI SAYFASI
-# --------------------------------------
+# Diğer sayfa ve program gösterim route'ları gerektiği şekilde uyarlanabilir...
 @app.route("/sports")
 def sports():
     programs = Program.query.order_by(Program.name).all()
-    html = "<h2>Spor Programları</h2><ul>"
-    for prog in programs:
-        html += f"<li>{prog.name} (Kategori: {prog.category.name}) - <a href='/watch/{prog.id}'>İZLE</a></li>"
-    html += "</ul>"
-    return html
+    return render_template("sports.html", programs=programs)
 
 # --------------------------------------
-# 11) LOG GÖRÜNTÜLEME (OPSİYONEL)
-# --------------------------------------
-@app.route("/logs")
-def show_logs():
-    logs = WatchLog.query.order_by(WatchLog.watched_at.desc()).all()
-    html = "<h2>İzleme Logları</h2>"
-    for log in logs:
-        u = log.user
-        p = log.program
-        user_info = f"{u.username} / {u.name}" if (u and u.name) else (u.username if u else "Bilinmiyor")
-        cat_name = p.category.name if p.category else "Bilinmiyor"
-        html += f"<p>Kullanıcı: {user_info}, Program: {p.name} (Kategori: {cat_name}), Tarih: {log.watched_at}</p>"
-    return html
-
-# --------------------------------------
-# 12) UYGULAMAYI BAŞLAT
+# UYGULAMAYI BAŞLAT
 # --------------------------------------
 if __name__ == "__main__":
     with app.app_context():
