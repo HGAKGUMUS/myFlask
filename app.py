@@ -7,7 +7,6 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
 app.secret_key = "dev_secret_key"  # Üretimde environment variable kullanın
-# Dummy commit değişikliği: test için eklendi.
 
 # --------------------------------------
 # 1) VERİTABANI AYARI
@@ -29,18 +28,15 @@ db = SQLAlchemy(app)
 # 2) MODELLER (Tablolar)
 # --------------------------------------
 
-# Kullanıcı temel bilgileri (login vs için)
 class User(db.Model):
     __tablename__ = "users"
-    id = db.Column(db.Integer, primary_key=True)  # Artık "id" adında
+    id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(50), unique=True, nullable=False)
     email = db.Column(db.String(100), unique=True, nullable=False)
     password = db.Column(db.String(200), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    # Kullanıcı profili ile bire bir ilişki
     profile = db.relationship("UserProfile", uselist=False, backref="user")
 
-# Kullanıcıya ait detaylı profil bilgileri
 class UserProfile(db.Model):
     __tablename__ = "user_profiles"
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"), primary_key=True)
@@ -50,45 +46,40 @@ class UserProfile(db.Model):
     gender = db.Column(db.String(10))
     height = db.Column(db.Numeric(5,2))
     weight = db.Column(db.Numeric(5,2))
-    experience_level = db.Column(db.String(20))
+    experience_level = db.Column(db.String(20))  # Önemli: Deneyim seviyesi
     goals = db.Column(db.Text)
     city_id = db.Column(db.Integer, db.ForeignKey("cities.city_id"))
     district_id = db.Column(db.Integer, db.ForeignKey("districts.district_id"))
 
-# Şehir tablosu
 class City(db.Model):
     __tablename__ = "cities"
     city_id = db.Column(db.Integer, primary_key=True)
     city_name = db.Column(db.String(100), nullable=False)
     districts = db.relationship("District", backref="city", lazy=True)
 
-# İlçe tablosu
 class District(db.Model):
     __tablename__ = "districts"
     district_id = db.Column(db.Integer, primary_key=True)
     city_id = db.Column(db.Integer, db.ForeignKey("cities.city_id"), nullable=False)
     district_name = db.Column(db.String(100), nullable=False)
 
-# Spor kategorileri (örneğin: Futbol, Basketbol vs.)
 class Category(db.Model):
     __tablename__ = "categories"
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), unique=True, nullable=False)
 
-# Spor programı bilgileri
 class Program(db.Model):
     __tablename__ = "programs"
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), unique=True, nullable=False)
     category_id = db.Column(db.Integer, db.ForeignKey('categories.id'), nullable=False)
-    level = db.Column(db.String(20))  # "Basic" veya "Advanced"
-    exercise_steps = db.Column(db.Text)  # Adım adım açıklamalar
-    duration = db.Column(db.Integer)      # Dakika cinsinden
+    level = db.Column(db.String(20))   # "Beginner", "Intermediate", "Advanced"
+    exercise_steps = db.Column(db.Text)
+    duration = db.Column(db.Integer)   
     rest_intervals = db.Column(db.Text)
     notes = db.Column(db.Text)
     category = db.relationship('Category', backref=db.backref('programs', lazy=True))
 
-# İzleme logları
 class WatchLog(db.Model):
     __tablename__ = "watch_logs"
     id = db.Column(db.Integer, primary_key=True)
@@ -98,7 +89,6 @@ class WatchLog(db.Model):
     user = db.relationship('User', backref=db.backref('watch_logs', lazy=True))
     program = db.relationship('Program', backref=db.backref('watch_logs', lazy=True))
 
-# Kullanıcının seçtiği programı saklamak için
 class UserProgram(db.Model):
     __tablename__ = "user_programs"
     id = db.Column(db.Integer, primary_key=True)
@@ -129,7 +119,6 @@ def validate_password(pw):
 # Tabloları Oluşturma ve Örnek Veriler Ekleme
 # --------------------------------------
 def create_tables():
-    # Geliştirme ortamında önce eski tabloları silip yeniden oluşturmak için:
     db.drop_all()
     db.create_all()
     db.session.commit()
@@ -170,7 +159,7 @@ def create_tables():
             prog_basic = Program(
                 name=f"Beginner {cat.name}",
                 category_id=cat.id,
-                level="Basic",
+                level="Beginner",   # Değiştirdik: "Basic" yerine "Beginner"
                 exercise_steps="1. Isınma; 2. Ana Egzersiz; 3. Soğuma",
                 duration=30,
                 rest_intervals="Set arası 1 dk",
@@ -234,10 +223,12 @@ def register():
             age_val = int(age_str) if age_str else None
         except:
             age_val = None
+
         try:
             height_val = float(height_str) if height_str else None
         except:
             height_val = None
+
         try:
             weight_val = float(weight_str) if weight_str else None
         except:
@@ -255,7 +246,7 @@ def register():
             gender=gender,
             height=height_val,
             weight=weight_val,
-            experience_level=experience_level,
+            experience_level=experience_level,  # Deneyim seviyesi kaydı
             goals=goals,
             city_id=int(city_id) if city_id else None,
             district_id=int(district_id) if district_id else None
@@ -277,7 +268,7 @@ def login():
     if request.method == "POST":
         username = request.form.get("username")
         password = request.form.get("password")
-        
+
         user = User.query.filter_by(username=username).first()
         if not user:
             flash("Kullanıcı bulunamadı!")
@@ -310,7 +301,6 @@ def home():
     user_id = session.get("user_id")
     if user_id:
         user = User.query.get(user_id)
-        # Güvenli kontrol: Eğer profil None ise, kullanıcı adını kullan.
         display_name = user.profile.name if user.profile and user.profile.name else user.username
         return render_template("home.html", username=display_name, user_id=user_id)
     return render_template("home.html", username="Ziyaretçi", user_id=None)
@@ -320,7 +310,23 @@ def home():
 # --------------------------------------
 @app.route("/sports")
 def sports():
-    programs = Program.query.order_by(Program.name).all()
+    # 3. adım (Opsiyonel Filtre): gender ve level parametrelerini alalım
+    gender_param = request.args.get("gender", "")
+    level_param = request.args.get("level", "")
+
+    query = Program.query
+    
+    # Program "name" içinde (Kadın) / (Erkek) ifadesini arayarak filtreleyebilirsiniz
+    # (Eğer program kaydını bu şekilde isimlendirdiyseniz)
+    if gender_param:
+        query = query.filter(Program.name.ilike(f"%({gender_param})%"))
+
+    # Level parametresi ile filtre
+    if level_param:
+        query = query.filter(Program.level.ilike(level_param))
+    
+    programs = query.order_by(Program.name).all()
+
     return render_template("sports.html", programs=programs)
 
 # --------------------------------------
@@ -335,11 +341,9 @@ def choose_program(program_id):
     
     program = Program.query.get(program_id)
     if program:
-        # Kullanıcının seçtiği programı UserProgram tablosuna kaydedelim.
-        new_user_program = UserProgram(user_id=user_id, program_id=program.id)
+        new_user_program = UserProgram(user_id=user_id, program_id=program_id)
         db.session.add(new_user_program)
         db.session.commit()
-        
         flash(f"{program.name} programı seçildi ve kaydedildi!")
     else:
         flash("Program bulunamadı!")
