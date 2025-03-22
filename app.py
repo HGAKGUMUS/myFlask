@@ -120,7 +120,7 @@ def validate_password(pw):
 # Tabloları Oluşturma ve Örnek Veriler Ekleme
 # --------------------------------------
 def create_tables():
-    db.drop_all(checkfirst=True)
+    db.drop_all()  # checkfirst parametresi kaldırıldı, default davranış zaten checkfirst'tir
     db.create_all()
     db.session.commit()
 
