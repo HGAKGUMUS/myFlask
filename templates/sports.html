@@ -3,23 +3,8 @@
 {% block content %}
 <h2 class="mt-4">Spor Programları</h2>
 
-<!-- Opsiyonel Filtre: Cinsiyet ve Seviye -->
-<form method="GET" action="{{ url_for('sports') }}" class="mb-3">
-  <label>Cinsiyet (program adında):</label>
-  <select name="gender">
-    <option value="">Hepsi</option>
-    <option value="Kadın">Kadın</option>
-    <option value="Erkek">Erkek</option>
-  </select>
-  <label>Seviye:</label>
-  <select name="level">
-    <option value="">Hepsi</option>
-    <option value="Beginner">Beginner</option>
-    <option value="Intermediate">Intermediate</option>
-    <option value="Advanced">Advanced</option>
-  </select>
-  <button type="submit">Filtrele</button>
-</form>
+<!-- Otomatik filtreleme yapılıyor; eğer kullanıcı "Daha fazla göster" butonuna tıklarsa filtreler kaldırılır -->
+<a href="{{ url_for('sports', show_all='true') }}" class="btn btn-secondary mb-3">Daha Fazla Göster</a>
 
 <div class="list-group">
   {% for program in programs %}

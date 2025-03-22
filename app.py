@@ -43,10 +43,10 @@ class UserProfile(db.Model):
     name = db.Column(db.String(100))
     zodiac = db.Column(db.String(50))
     age = db.Column(db.Integer)
-    gender = db.Column(db.String(10))
+    gender = db.Column(db.String(10))   # female, male, other
     height = db.Column(db.Numeric(5,2))
     weight = db.Column(db.Numeric(5,2))
-    experience_level = db.Column(db.String(20))  # Önemli: Deneyim seviyesi
+    experience_level = db.Column(db.String(20))  # Beginner, Intermediate, Advanced
     goals = db.Column(db.Text)
     city_id = db.Column(db.Integer, db.ForeignKey("cities.city_id"))
     district_id = db.Column(db.Integer, db.ForeignKey("districts.district_id"))
@@ -73,11 +73,12 @@ class Program(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), unique=True, nullable=False)
     category_id = db.Column(db.Integer, db.ForeignKey('categories.id'), nullable=False)
-    level = db.Column(db.String(20))   # "Beginner", "Intermediate", "Advanced"
+    level = db.Column(db.String(20))   # Beginner, Intermediate, Advanced
     exercise_steps = db.Column(db.Text)
     duration = db.Column(db.Integer)   
     rest_intervals = db.Column(db.Text)
     notes = db.Column(db.Text)
+    gender = db.Column(db.String(10), default="unisex")  # female, male, unisex
     category = db.relationship('Category', backref=db.backref('programs', lazy=True))
 
 class WatchLog(db.Model):
@@ -155,26 +156,93 @@ def create_tables():
         db.session.commit()
         categories = Category.query.all()
         programs = []
+        # Örnek olarak, sadece "Fitness" kategorisinde kayıt yapacağımızı varsayıyoruz (ID=3) veya tüm kategorilerden örnek ekleyebilirsiniz.
         for cat in categories:
+            # Tek günlük programlar için örnek (sadece Beginner ve Advanced ekliyoruz)
             prog_basic = Program(
-                name=f"Beginner {cat.name}",
+                name=f"Beginner {cat.name} (Kadın)",
                 category_id=cat.id,
-                level="Beginner",   # Değiştirdik: "Basic" yerine "Beginner"
+                level="Beginner",
                 exercise_steps="1. Isınma; 2. Ana Egzersiz; 3. Soğuma",
                 duration=30,
                 rest_intervals="Set arası 1 dk",
-                notes="Doğru formu koruyun."
+                notes="Doğru formu koruyun.",
+                gender="female"
+            )
+            prog_basic_male = Program(
+                name=f"Beginner {cat.name} (Erkek)",
+                category_id=cat.id,
+                level="Beginner",
+                exercise_steps="1. Isınma; 2. Ana Egzersiz; 3. Soğuma",
+                duration=30,
+                rest_intervals="Set arası 1 dk",
+                notes="Temel hareketler, form önemli.",
+                gender="male"
             )
             prog_advanced = Program(
-                name=f"Advanced {cat.name}",
+                name=f"Advanced {cat.name} (Kadın)",
                 category_id=cat.id,
                 level="Advanced",
                 exercise_steps="1. Uzun ısınma; 2. Yoğun egzersiz; 3. Uzun soğuma",
                 duration=45,
                 rest_intervals="Set arası 1.5 dk",
-                notes="Tekniğe odaklanın."
+                notes="Ağır kilolarda dikkat.",
+                gender="female"
             )
-            programs.extend([prog_basic, prog_advanced])
+            prog_advanced_male = Program(
+                name=f"Advanced {cat.name} (Erkek)",
+                category_id=cat.id,
+                level="Advanced",
+                exercise_steps="1. Uzun ısınma; 2. Yoğun egzersiz; 3. Uzun soğuma",
+                duration=45,
+                rest_intervals="Set arası 1.5 dk",
+                notes="Ağır çalışmada form çok önemli.",
+                gender="male"
+            )
+            programs.extend([prog_basic, prog_basic_male, prog_advanced, prog_advanced_male])
+        # Örnek olarak sadece Fitness kategorisi için 3 günlük split eklemek isterseniz:
+        # (Varsayalım Fitness kategorisinin ID'si 3 olsun)
+        prog_split_basic_female = Program(
+            name="Beginner 3-Day Split (Kadın)",
+            category_id=3,
+            level="Beginner",
+            exercise_steps="Day 1: Üst Vücut (Knee Push-up, Dumbbell Row...); Day 2: Bacak & Karın (Squat, Plank...); Day 3: Kardiyo & Full Body (Yürüyüş, Shoulder Press...)",
+            duration=35,
+            rest_intervals="Set arası 1 dk, günler arasında 1 gün dinlenme",
+            notes="Yeni başlayan kadınlar için haftalık 3 günlük program.",
+            gender="female"
+        )
+        prog_split_basic_male = Program(
+            name="Beginner 3-Day Split (Erkek)",
+            category_id=3,
+            level="Beginner",
+            exercise_steps="Day 1: Üst Vücut (Push-up, Bent-over Row...); Day 2: Bacak & Karın (Squat, Lunge, Plank...); Day 3: Kardiyo & Full Body (Koşu, Shoulder Press...)",
+            duration=40,
+            rest_intervals="Set arası 1 dk, günler arasında 1 gün dinlenme",
+            notes="Yeni başlayan erkekler için haftalık 3 günlük program.",
+            gender="male"
+        )
+        prog_split_adv_female = Program(
+            name="Advanced 3-Day Split (Kadın)",
+            category_id=3,
+            level="Advanced",
+            exercise_steps="Day 1: Göğüs & Sırt (Bench Press, Barbell Row...); Day 2: Bacak & Karın (Squat, Deadlift, Plank...); Day 3: Omuz & Kardiyo (Shoulder Press, 20 dk koşu...)",
+            duration=60,
+            rest_intervals="Set arası 1.5-2 dk, günler arasında 1 gün dinlenme",
+            notes="İleri seviye kadınlar için split program. Form kritik.",
+            gender="female"
+        )
+        prog_split_adv_male = Program(
+            name="Advanced 3-Day Split (Erkek)",
+            category_id=3,
+            level="Advanced",
+            exercise_steps="Day 1: Göğüs & Sırt (Bench Press, Barbell Row...); Day 2: Bacak & Karın (Squat, Deadlift, Plank...); Day 3: Omuz & Kardiyo (Overhead Press, 20 dk HIIT...)",
+            duration=70,
+            rest_intervals="Set arası 1.5-2 dk, günler arasında 1 gün dinlenme",
+            notes="İleri seviye erkekler için split program. Bel, diz, omuz sakatlık riskine dikkat.",
+            gender="male"
+        )
+        programs.extend([prog_split_basic_female, prog_split_basic_male, prog_split_adv_female, prog_split_adv_male])
         db.session.add_all(programs)
         db.session.commit()
 
@@ -223,12 +291,10 @@ def register():
             age_val = int(age_str) if age_str else None
         except:
             age_val = None
-
         try:
             height_val = float(height_str) if height_str else None
         except:
             height_val = None
-
         try:
             weight_val = float(weight_str) if weight_str else None
         except:
@@ -246,7 +312,7 @@ def register():
             gender=gender,
             height=height_val,
             weight=weight_val,
-            experience_level=experience_level,  # Deneyim seviyesi kaydı
+            experience_level=experience_level,
             goals=goals,
             city_id=int(city_id) if city_id else None,
             district_id=int(district_id) if district_id else None
@@ -268,7 +334,7 @@ def login():
     if request.method == "POST":
         username = request.form.get("username")
         password = request.form.get("password")
-
+        
         user = User.query.filter_by(username=username).first()
         if not user:
             flash("Kullanıcı bulunamadı!")
@@ -310,23 +376,32 @@ def home():
 # --------------------------------------
 @app.route("/sports")
 def sports():
-    # 3. adım (Opsiyonel Filtre): gender ve level parametrelerini alalım
-    gender_param = request.args.get("gender", "")
-    level_param = request.args.get("level", "")
-
-    query = Program.query
+    user_id = session.get("user_id")
+    if not user_id:
+        flash("Programları görmek için önce giriş yapın.")
+        return redirect(url_for("login"))
     
-    # Program "name" içinde (Kadın) / (Erkek) ifadesini arayarak filtreleyebilirsiniz
-    # (Eğer program kaydını bu şekilde isimlendirdiyseniz)
-    if gender_param:
-        query = query.filter(Program.name.ilike(f"%({gender_param})%"))
-
-    # Level parametresi ile filtre
-    if level_param:
-        query = query.filter(Program.level.ilike(level_param))
+    user = User.query.get(user_id)
+    if not user or not user.profile:
+        flash("Profil bilgileriniz eksik. Lütfen profilinizi güncelleyin.")
+        return redirect(url_for("home"))
+    
+    # Kullanıcının profilinden cinsiyet ve deneyim seviyesini alıyoruz:
+    auto_gender = user.profile.gender if user.profile.gender else "unisex"
+    auto_level = user.profile.experience_level if user.profile.experience_level else ""
+    
+    # "Daha fazla göster" seçeneği kontrolü: URL ?show_all=true eklenmişse filtreleri kaldır
+    show_all = request.args.get("show_all", "false").lower() == "true"
+    
+    query = Program.query
+    if not show_all:
+        # Programın gender sütununa göre filtre; ya profil ile eşleşsin ya da 'unisex' olsun
+        query = query.filter(db.or_(Program.gender == auto_gender, Program.gender == "unisex"))
+        # Deneyim seviyesi filtresi:
+        if auto_level:
+            query = query.filter(Program.level.ilike(auto_level))
     
     programs = query.order_by(Program.name).all()
-
     return render_template("sports.html", programs=programs)
 
 # --------------------------------------
