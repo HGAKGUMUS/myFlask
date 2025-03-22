@@ -367,9 +367,14 @@ def home():
     user_id = session.get("user_id")
     if user_id:
         user = User.query.get(user_id)
-        display_name = user.profile.name if user.profile and user.profile.name else user.username
+        # Kullanıcı profilinin varlığını kontrol ediyoruz:
+        if user and user.profile:
+            display_name = user.profile.name if user.profile.name else user.username
+        else:
+            display_name = user.username  # Profil yoksa kullanıcı adını göster
         return render_template("home.html", username=display_name, user_id=user_id)
     return render_template("home.html", username="Ziyaretçi", user_id=None)
+
 
 # --------------------------------------
 # SPOR PROGRAMLARI GÖSTERİMİ (SPORTS)
