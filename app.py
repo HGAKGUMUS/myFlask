@@ -12,7 +12,9 @@ app.secret_key = "dev_secret_key"  # Üretimde environment variable kullanın
 # --------------------------------------
 # 1) VERİTABANI AYARI
 # --------------------------------------
-db_url = os.environ.get("DATABASE_URL", "postgresql://postgres:932653@localhost:5432/my_flask_db")
+# Railway'den aldığınız bağlantı dizesi:
+default_db_url = "postgresql://postgres:LKLdBTyibvuWNWGBSdgdUvniNRPJQTwG@switchyard.proxy.rlwy.net:15854/railway"
+db_url = os.environ.get("DATABASE_URL", default_db_url)
 db_url = db_url.strip().lstrip("=")
 if db_url.startswith("postgres://"):
     db_url = db_url.replace("postgres://", "postgresql+psycopg2://", 1)
