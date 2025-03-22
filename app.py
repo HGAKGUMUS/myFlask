@@ -96,7 +96,7 @@ class WatchLog(db.Model):
     user = db.relationship('User', backref=db.backref('watch_logs', lazy=True))
     program = db.relationship('Program', backref=db.backref('watch_logs', lazy=True))
 
-# Kullanıcının seçtiği programı saklamak için (Opsiyonel - Adım 5)
+# Kullanıcının seçtiği programı saklamak için (UserProgram)
 class UserProgram(db.Model):
     __tablename__ = "user_programs"
     id = db.Column(db.Integer, primary_key=True)
@@ -307,6 +307,7 @@ def home():
     user_id = session.get("user_id")
     if user_id:
         user = User.query.get(user_id)
+        # Güvenli kontrol: Eğer profil None ise, kullanıcı adını kullan.
         display_name = user.profile.name if user.profile and user.profile.name else user.username
         return render_template("home.html", username=display_name, user_id=user_id)
     return render_template("home.html", username="Ziyaretçi", user_id=None)
