@@ -397,7 +397,7 @@ def sports():
     
     # Kullanıcının profilinden cinsiyet ve deneyim seviyesini alıyoruz:
     auto_gender = user.profile.gender if user.profile.gender else "unisex"
-    auto_level = user.profile.experience_level if user.profile.experience_level else ""
+    auto_level = user.profile.experience_level.strip() if user.profile.experience_level else ""
     
     # "Daha fazla göster" seçeneği kontrolü: URL ?show_all=true eklenmişse filtreleri kaldır
     show_all = request.args.get("show_all", "false").lower() == "true"
@@ -406,12 +406,13 @@ def sports():
     if not show_all:
         # Programın gender sütununa göre filtre; ya profil ile eşleşsin ya da 'unisex' olsun
         query = query.filter(db.or_(Program.gender == auto_gender, Program.gender == "unisex"))
-        # Deneyim seviyesi filtresi:
+        # Deneyim seviyesi filtresi: Lowercase karşılaştırma yapıyoruz
         if auto_level:
-            query = query.filter(Program.level.ilike(auto_level))
+            query = query.filter(db.func.lower(Program.level) == auto_level.lower())
     
     programs = query.order_by(Program.name).all()
     return render_template("sports.html", programs=programs)
+
 
 # --------------------------------------
 # KULLANICININ SEÇTİĞİ PROGRAMI İŞLEME (CHOOSE PROGRAM)
