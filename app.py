@@ -113,6 +113,8 @@ def validate_password(pw):
 # Tabloları Oluşturma ve Örnek Veriler Ekleme
 # --------------------------------------
 def create_tables():
+    # Geliştirme ortamında önce eski tabloları silip yeniden oluşturmak için:
+    db.drop_all()
     db.create_all()
 
     # Şehirler ve ilçeler (örnek veriler)
@@ -171,7 +173,7 @@ def create_tables():
         db.session.commit()
 
 # --------------------------------------
-# GET İLE İLÇE VERİSİ DÖNDÜRME (AJAX için)
+# GET İle İlçe Verisi Döndürme (AJAX için)
 # --------------------------------------
 @app.route("/get_districts/<int:city_id>")
 def get_districts(city_id):
