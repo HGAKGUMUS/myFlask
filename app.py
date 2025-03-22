@@ -12,8 +12,8 @@ app.secret_key = "dev_secret_key"  # Üretimde environment variable kullanın
 # --------------------------------------
 # 1) VERİTABANI AYARI
 # --------------------------------------
-# Railway'den aldığınız bağlantı dizesi:
-default_db_url = "postgresql://postgres:LKLdBTyibvuWNWGBSdgdUvniNRPJQTwG@switchyard.proxy.rlwy.net:15854/railway"
+# Railway veritabanı bağlantı dizesi; search_path "public" olarak ayarlanıyor:
+default_db_url = "postgresql://postgres:LKLdBTyibvuWNWGBSdgdUvniNRPJQTwG@switchyard.proxy.rlwy.net:15854/railway?options=-c%20search_path=public"
 db_url = os.environ.get("DATABASE_URL", default_db_url)
 db_url = db_url.strip().lstrip("=")
 if db_url.startswith("postgres://"):
@@ -98,7 +98,7 @@ class WatchLog(db.Model):
     user = db.relationship('User', backref=db.backref('watch_logs', lazy=True))
     program = db.relationship('Program', backref=db.backref('watch_logs', lazy=True))
 
-# Kullanıcının seçtiği programı saklamak için (UserProgram)
+# Kullanıcının seçtiği programı saklamak için
 class UserProgram(db.Model):
     __tablename__ = "user_programs"
     id = db.Column(db.Integer, primary_key=True)
@@ -132,6 +132,7 @@ def create_tables():
     # Geliştirme ortamında önce eski tabloları silip yeniden oluşturmak için:
     db.drop_all()
     db.create_all()
+    db.session.commit()
 
     # Şehirler ve ilçeler (örnek veriler)
     if not City.query.first():
