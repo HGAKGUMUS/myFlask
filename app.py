@@ -121,14 +121,14 @@ def validate_password(pw):
 # Tabloları Oluşturma ve Örnek Veriler Ekleme
 # --------------------------------------
 def create_tables():
-    # Public şemayı temizle (dikkat: bu, veritabanındaki tüm objeleri siler!)
-    db.session.execute(text("DROP SCHEMA public CASCADE; CREATE SCHEMA public;"))
+    # Public şemayı temizle ve public şemasını yeniden oluştur.
+    db.session.execute(text("DROP SCHEMA public CASCADE; CREATE SCHEMA public; SET search_path TO public;"))
     db.session.commit()
 
     db.create_all()
     db.session.commit()
 
-    # Şehirler ve ilçeler (örnek veriler)
+    # Şehirler ve ilçeler ekleme
     if not City.query.first():
         cities = [
             City(city_name="Istanbul"),
@@ -151,7 +151,8 @@ def create_tables():
         db.session.add_all(districts)
         db.session.commit()
 
-    # Spor kategorileri ve programları
+    # Spor kategorileri ve programları ekleme (kendi INSERT'lerinizi buraya ekleyin)
+    # ...
     if not Category.query.first():
         sports_categories = ["Futbol", "Basketbol", "Tenis", "Yüzme", "Yoga", "Fitness", "Boks", "Koşu"]
         for cat_name in sports_categories:
