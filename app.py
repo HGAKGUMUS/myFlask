@@ -4,6 +4,7 @@ from datetime import datetime
 from flask import Flask, request, session, render_template, redirect, url_for, flash, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
+from sqlalchemy import text  # Eklenen import
 
 app = Flask(__name__)
 app.secret_key = "dev_secret_key"  # Üretimde environment variable kullanın
@@ -75,7 +76,7 @@ class Program(db.Model):
     category_id = db.Column(db.Integer, db.ForeignKey('categories.id'), nullable=False)
     level = db.Column(db.String(20))   # Beginner, Intermediate, Advanced
     exercise_steps = db.Column(db.Text)
-    duration = db.Column(db.Integer)   
+    duration = db.Column(db.Integer)
     rest_intervals = db.Column(db.Text)
     notes = db.Column(db.Text)
     gender = db.Column(db.String(10), default="unisex")  # female, male, unisex
@@ -121,12 +122,11 @@ def validate_password(pw):
 # --------------------------------------
 def create_tables():
     # Public şemayı temizle (dikkat: bu, veritabanındaki tüm objeleri siler!)
-    db.session.execute("DROP SCHEMA public CASCADE; CREATE SCHEMA public;")
+    db.session.execute(text("DROP SCHEMA public CASCADE; CREATE SCHEMA public;"))
     db.session.commit()
 
     db.create_all()
     db.session.commit()
-
 
     # Şehirler ve ilçeler (örnek veriler)
     if not City.query.first():
@@ -160,9 +160,9 @@ def create_tables():
         db.session.commit()
         categories = Category.query.all()
         programs = []
-        # Örnek olarak, sadece "Fitness" kategorisinde kayıt yapacağımızı varsayıyoruz (ID=3) veya tüm kategorilerden örnek ekleyebilirsiniz.
+        # Örnek olarak, tüm kategorilerden program ekliyoruz.
         for cat in categories:
-            # Tek günlük programlar için örnek (sadece Beginner ve Advanced ekliyoruz)
+            # Tek günlük programlar (Beginner ve Advanced)
             prog_basic = Program(
                 name=f"Beginner {cat.name} (Kadın)",
                 category_id=cat.id,
@@ -204,8 +204,7 @@ def create_tables():
                 gender="male"
             )
             programs.extend([prog_basic, prog_basic_male, prog_advanced, prog_advanced_male])
-        # Örnek olarak sadece Fitness kategorisi için 3 günlük split eklemek isterseniz:
-        # (Varsayalım Fitness kategorisinin ID'si 3 olsun)
+        # Fitness kategorisi için 3 günlük split programları (varsayılan ID=3)
         prog_split_basic_female = Program(
             name="Beginner 3-Day Split (Kadın)",
             category_id=3,
@@ -375,10 +374,9 @@ def home():
         if user and user.profile:
             display_name = user.profile.name if user.profile.name else user.username
         else:
-            display_name = user.username  # Profil yoksa kullanıcı adını göster
+            display_name = user.username
         return render_template("home.html", username=display_name, user_id=user_id)
     return render_template("home.html", username="Ziyaretçi", user_id=None)
-
 
 # --------------------------------------
 # SPOR PROGRAMLARI GÖSTERİMİ (SPORTS)
@@ -412,7 +410,6 @@ def sports():
     
     programs = query.order_by(Program.name).all()
     return render_template("sports.html", programs=programs)
-
 
 # --------------------------------------
 # KULLANICININ SEÇTİĞİ PROGRAMI İŞLEME (CHOOSE PROGRAM)
