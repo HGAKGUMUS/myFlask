@@ -96,6 +96,19 @@ class WatchLog(db.Model):
     user = db.relationship('User', backref=db.backref('watch_logs', lazy=True))
     program = db.relationship('Program', backref=db.backref('watch_logs', lazy=True))
 
+# Kullanıcının seçtiği programı saklamak için (Opsiyonel - Adım 5)
+class UserProgram(db.Model):
+    __tablename__ = "user_programs"
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    program_id = db.Column(db.Integer, db.ForeignKey('programs.id'), nullable=False)
+    start_date = db.Column(db.Date, default=datetime.utcnow)
+    progress = db.Column(db.Numeric(5,2), default=0)
+    status = db.Column(db.String(20), default="active")
+    
+    user = db.relationship('User', backref=db.backref('user_programs', lazy=True))
+    program = db.relationship('Program', backref=db.backref('user_programs', lazy=True))
+
 # --------------------------------------
 # Şifre Validasyonu
 # --------------------------------------
@@ -197,7 +210,7 @@ def register():
         city_id = request.form.get("city")
         district_id = request.form.get("district")
         
-        # Yeni eklenen alanlar
+        # Yeni eklenen alanlar:
         gender = request.form.get("gender")
         height_str = request.form.get("height")
         weight_str = request.form.get("weight")
@@ -298,11 +311,35 @@ def home():
         return render_template("home.html", username=display_name, user_id=user_id)
     return render_template("home.html", username="Ziyaretçi", user_id=None)
 
-# Diğer sayfa ve program gösterim route'ları gerektiği şekilde uyarlanabilir...
+# --------------------------------------
+# SPOR PROGRAMLARI GÖSTERİMİ (SPORTS)
+# --------------------------------------
 @app.route("/sports")
 def sports():
     programs = Program.query.order_by(Program.name).all()
     return render_template("sports.html", programs=programs)
+
+# --------------------------------------
+# KULLANICININ SEÇTİĞİ PROGRAMI İŞLEME (CHOOSE PROGRAM)
+# --------------------------------------
+@app.route("/choose_program/<int:program_id>")
+def choose_program(program_id):
+    user_id = session.get("user_id")
+    if not user_id:
+        flash("Önce giriş yapmanız gerekir!")
+        return redirect(url_for("login"))
+    
+    program = Program.query.get(program_id)
+    if program:
+        # Kullanıcının seçtiği programı UserProgram tablosuna kaydedelim.
+        new_user_program = UserProgram(user_id=user_id, program_id=program.id)
+        db.session.add(new_user_program)
+        db.session.commit()
+        
+        flash(f"{program.name} programı seçildi ve kaydedildi!")
+    else:
+        flash("Program bulunamadı!")
+    return redirect(url_for("sports"))
 
 # --------------------------------------
 # UYGULAMAYI BAŞLAT
