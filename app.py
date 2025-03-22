@@ -196,40 +196,60 @@ def register():
         age_str = request.form.get("age")
         city_id = request.form.get("city")
         district_id = request.form.get("district")
-
+        
+        # Yeni eklenen alanlar
+        gender = request.form.get("gender")
+        height_str = request.form.get("height")
+        weight_str = request.form.get("weight")
+        experience_level = request.form.get("experience_level")
+        goals = request.form.get("goals")
+        
         existing = User.query.filter_by(username=username).first()
         if existing:
             flash("Bu kullanıcı adı zaten mevcut!")
             return render_template("register.html", cities=City.query.all())
-
+        
         if not validate_password(password):
             flash("Şifre 8 karakter olmalı ve en az 1 büyük harf, 1 küçük harf, 1 rakam içermelidir.")
             return render_template("register.html", cities=City.query.all())
-
+        
         hashed_pw = generate_password_hash(password)
         try:
             age_val = int(age_str) if age_str else None
         except:
             age_val = None
-
+        try:
+            height_val = float(height_str) if height_str else None
+        except:
+            height_val = None
+        try:
+            weight_val = float(weight_str) if weight_str else None
+        except:
+            weight_val = None
+        
         new_user = User(username=username, email=email, password=hashed_pw)
         db.session.add(new_user)
         db.session.commit()
-
+        
         new_profile = UserProfile(
             user_id=new_user.id,
             name=name,
             zodiac=zodiac,
             age=age_val,
+            gender=gender,
+            height=height_val,
+            weight=weight_val,
+            experience_level=experience_level,
+            goals=goals,
             city_id=int(city_id) if city_id else None,
             district_id=int(district_id) if district_id else None
         )
         db.session.add(new_profile)
         db.session.commit()
-
+        
         flash("Kayıt başarılı! Lütfen giriş yapın.")
         return redirect(url_for("login"))
-
+    
     cities = City.query.all()
     return render_template("register.html", cities=cities)
 
@@ -241,7 +261,7 @@ def login():
     if request.method == "POST":
         username = request.form.get("username")
         password = request.form.get("password")
-
+        
         user = User.query.filter_by(username=username).first()
         if not user:
             flash("Kullanıcı bulunamadı!")
