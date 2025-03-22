@@ -7,6 +7,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
 app.secret_key = "dev_secret_key"  # Üretimde environment variable kullanın
+# Dummy commit değişikliği: test için eklendi.
 
 # --------------------------------------
 # 1) VERİTABANI AYARI
