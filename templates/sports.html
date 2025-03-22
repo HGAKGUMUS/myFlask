@@ -1,20 +1,30 @@
+<!-- sports.html -->
 {% extends "base.html" %}
 {% block title %}Spor Programları{% endblock %}
 {% block content %}
 <h2 class="mt-4">Spor Programları</h2>
 
-<!-- Otomatik filtreleme yapılıyor; eğer kullanıcı "Daha fazla göster" butonuna tıklarsa filtreler kaldırılır -->
 <a href="{{ url_for('sports', show_all='true') }}" class="btn btn-secondary mb-3">Daha Fazla Göster</a>
 
 <div class="list-group">
   {% for program in programs %}
-    <a href="{{ url_for('choose_program', program_id=program.id) }}" class="list-group-item list-group-item-action">
+    <div class="list-group-item">
       <h5>{{ program.name }}</h5>
-      <p>{{ program.exercise_steps }}</p>
+      
+      <!-- Program adımlarını liste halinde gösterelim -->
+      <ul>
+        {% for step in program.exercise_steps.split(';') %}
+          <li>{{ step|trim }}</li>
+        {% endfor %}
+      </ul>
+
       <small>Süre: {{ program.duration }} dk | Seviye: {{ program.level }}</small><br>
       <small>Dinlenme: {{ program.rest_intervals }}</small><br>
-      <small>Notlar: {{ program.notes }}</small>
-    </a>
+      <small>Notlar: {{ program.notes }}</small><br>
+      <a href="{{ url_for('choose_program', program_id=program.id) }}" class="btn btn-sm btn-primary mt-2">
+        Programı Seç
+      </a>
+    </div>
   {% endfor %}
 </div>
 {% endblock %}
