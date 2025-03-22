@@ -120,9 +120,10 @@ def validate_password(pw):
 # Tabloları Oluşturma ve Örnek Veriler Ekleme
 # --------------------------------------
 def create_tables():
-    db.drop_all()
+    db.drop_all(checkfirst=True)
     db.create_all()
     db.session.commit()
+
 
     # Şehirler ve ilçeler (örnek veriler)
     if not City.query.first():
