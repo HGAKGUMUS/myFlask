@@ -371,11 +371,12 @@ def home():
     user_id = session.get("user_id")
     if user_id:
         user = User.query.get(user_id)
-        # Kullanıcı profilinin varlığını kontrol ediyoruz:
-        if user and user.profile:
-            display_name = user.profile.name if user.profile.name else user.username
-        else:
-            display_name = user.username
+        if not user:
+            # Eğer session'da saklı user_id veritabanında yoksa, session'ı temizleyip girişe yönlendirin.
+            session.clear()
+            flash("Kullanıcı bulunamadı, lütfen tekrar giriş yapın.")
+            return redirect(url_for("login"))
+        display_name = user.profile.name if user.profile and user.profile.name else user.username
         return render_template("home.html", username=display_name, user_id=user_id)
     return render_template("home.html", username="Ziyaretçi", user_id=None)
 
