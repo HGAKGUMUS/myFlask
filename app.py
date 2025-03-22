@@ -120,7 +120,10 @@ def validate_password(pw):
 # Tabloları Oluşturma ve Örnek Veriler Ekleme
 # --------------------------------------
 def create_tables():
-    db.drop_all()  # checkfirst parametresi kaldırıldı, default davranış zaten checkfirst'tir
+    # Public şemayı temizle (dikkat: bu, veritabanındaki tüm objeleri siler!)
+    db.session.execute("DROP SCHEMA public CASCADE; CREATE SCHEMA public;")
+    db.session.commit()
+
     db.create_all()
     db.session.commit()
 
