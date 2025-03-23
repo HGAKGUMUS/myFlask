@@ -1,30 +1,39 @@
-<!-- sports.html -->
 {% extends "base.html" %}
 {% block title %}Spor Programları{% endblock %}
 {% block content %}
-<h2 class="mt-4">Spor Programları</h2>
 
-<a href="{{ url_for('sports', show_all='true') }}" class="btn btn-secondary mb-3">Daha Fazla Göster</a>
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h2 class="mb-0">Spor Programları</h2>
+  <a href="{{ url_for('sports', show_all='true') }}" class="btn btn-secondary">
+    Daha Fazla Göster
+  </a>
+</div>
 
-<div class="list-group">
+<div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
   {% for program in programs %}
-    <div class="list-group-item">
-      <h5>{{ program.name }}</h5>
-      
-      <!-- Program adımlarını liste halinde gösterelim -->
-      <ul>
-        {% for step in program.exercise_steps.split(';') %}
-          <li>{{ step|trim }}</li>
-        {% endfor %}
-      </ul>
-
-      <small>Süre: {{ program.duration }} dk | Seviye: {{ program.level }}</small><br>
-      <small>Dinlenme: {{ program.rest_intervals }}</small><br>
-      <small>Notlar: {{ program.notes }}</small><br>
-      <a href="{{ url_for('choose_program', program_id=program.id) }}" class="btn btn-sm btn-primary mt-2">
-        Programı Seç
-      </a>
+    <div class="col">
+      <div class="card h-100 shadow-sm">
+        <div class="card-body">
+          <h5 class="card-title">{{ program.name }}</h5>
+          <p class="card-text">
+            <strong>Seviye:</strong> {{ program.level }} <br>
+            <strong>Süre:</strong> {{ program.duration }} dk <br>
+            <strong>Cinsiyet:</strong> {{ program.gender }} <br>
+            <strong>Dinlenme:</strong> {{ program.rest_intervals }}
+          </p>
+          <!-- Adımların kısa gösterimi (60 karakter) -->
+          <p class="small text-muted">
+            {{ program.exercise_steps[0:60] }}{% if program.exercise_steps|length > 60 %}...{% endif %}
+          </p>
+        </div>
+        <div class="card-footer bg-white border-0">
+          <a href="{{ url_for('choose_program', program_id=program.id) }}" class="btn btn-primary w-100">
+            Programı Seç
+          </a>
+        </div>
+      </div>
     </div>
   {% endfor %}
 </div>
+
 {% endblock %}
