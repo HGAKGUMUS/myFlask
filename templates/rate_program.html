@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}Programı Puanla | FitBoost{% endblock %}
+
+{% block content %}
+<div class="text-center">
+  <h2>{{ program.name }} Programını Puanla</h2>
+  <form method="POST">
+    <div class="mb-3">
+      <label for="rating" class="form-label">Puan (1-5)</label>
+      <select class="form-select w-25 mx-auto" name="rating" id="rating">
+        <option value="1">1 - Kötü</option>
+        <option value="2">2 - Fena Değil</option>
+        <option value="3">3 - Orta</option>
+        <option value="4">4 - İyi</option>
+        <option value="5">5 - Harika</option>
+      </select>
+    </div>
+    <div class="mb-3">
+      <label for="feedback" class="form-label">Yorum</label>
+      <textarea class="form-control mx-auto" style="max-width:400px;" 
+                name="feedback" id="feedback" rows="3"></textarea>
+    </div>
+    <button type="submit" class="btn btn-primary">Gönder</button>
+  </form>
+</div>
+{% endblock %}

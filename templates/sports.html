@@ -1,39 +1,28 @@
 {% extends "base.html" %}
-{% block title %}Spor Programları{% endblock %}
+{% block title %}Spor Programları | FitBoost{% endblock %}
+
 {% block content %}
-
-<div class="d-flex justify-content-between align-items-center mb-4">
-  <h2 class="mb-0">Spor Programları</h2>
-  <a href="{{ url_for('sports', show_all='true') }}" class="btn btn-secondary">
-    Daha Fazla Göster
-  </a>
-</div>
-
-<div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+<h2>Spor Programları</h2>
+<div class="row">
   {% for program in programs %}
-    <div class="col">
-      <div class="card h-100 shadow-sm">
+    <div class="col-md-4 mb-3">
+      <div class="card h-100">
         <div class="card-body">
           <h5 class="card-title">{{ program.name }}</h5>
           <p class="card-text">
-            <strong>Seviye:</strong> {{ program.level }} <br>
-            <strong>Süre:</strong> {{ program.duration }} dk <br>
-            <strong>Cinsiyet:</strong> {{ program.gender }} <br>
-            <strong>Dinlenme:</strong> {{ program.rest_intervals }}
+            <strong>Seviye:</strong> {{ program.level }}<br>
+            <strong>Cinsiyet:</strong> {{ program.gender }}<br>
+            <!-- Kısa açıklama, exercise_steps vb. gelebilir -->
           </p>
-          <!-- Adımların kısa gösterimi (60 karakter) -->
-          <p class="small text-muted">
-            {{ program.exercise_steps[0:60] }}{% if program.exercise_steps|length > 60 %}...{% endif %}
-          </p>
-        </div>
-        <div class="card-footer bg-white border-0">
-          <a href="{{ url_for('choose_program', program_id=program.id) }}" class="btn btn-primary w-100">
-            Programı Seç
-          </a>
+          {% if session.get('user_id') %}
+            <a href="{{ url_for('choose_program', program_id=program.id) }}" class="btn btn-primary">Programı Seç</a>
+            <a href="{{ url_for('rate_program', program_id=program.id) }}" class="btn btn-secondary mt-2">Puan Ver</a>
+          {% else %}
+            <small class="text-muted">Program seçmek veya puan vermek için giriş yapın.</small>
+          {% endif %}
         </div>
       </div>
     </div>
   {% endfor %}
 </div>
-
 {% endblock %}

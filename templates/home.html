@@ -1,18 +1,20 @@
 {% extends "base.html" %}
-{% block title %}Ana Sayfa{% endblock %}
+{% block title %}Ana Sayfa | FitBoost{% endblock %}
 
 {% block content %}
-<div class="p-5 mb-4 bg-light rounded-3">
-  <div class="container py-5">
-    <h1 class="display-5 fw-bold">Hoş Geldin, {{ username }}!</h1>
-    {% if session.get("user_id") %}
-      <p class="col-md-8 fs-4">Kişiselleştirilmiş spor programlarına erişebilir, profilini yönetebilirsin.</p>
-      <a class="btn btn-primary btn-lg" href="{{ url_for('sports') }}" role="button">Programlara Göz At</a>
+<div class="text-center">
+  <h1>Hoşgeldiniz
+    {% if user and user.username %}
+      {{ user.username }}
     {% else %}
-      <p class="col-md-8 fs-4">Sitemize üye olarak ücretsiz spor programlarına ulaşabilirsiniz.</p>
-      <a class="btn btn-primary btn-lg" href="{{ url_for('login') }}" role="button">Giriş Yap</a>
-      <a class="btn btn-success btn-lg" href="{{ url_for('register') }}" role="button">Kayıt Ol</a>
+      Ziyaretçi
     {% endif %}
-  </div>
+  </h1>
+  <p>Projemize hoşgeldiniz! Hemen giriş yapabilir veya kayıt olabilirsiniz.</p>
+  <p>
+    <a href="{{ url_for('login') }}" class="btn btn-primary mx-2">Giriş Yap</a>
+    <a href="{{ url_for('register') }}" class="btn btn-secondary mx-2">Kayıt Ol</a>
+  </p>
+  <small>Kayıt olduğunuz sırada topladığımız bilgiler akademik proje kapsamında kullanılacaktır.</small>
 </div>
 {% endblock %}

@@ -1,41 +1,27 @@
 {% extends "base.html" %}
-{% block title %}Profil{% endblock %}
+{% block title %}Profil | FitBoost{% endblock %}
+
 {% block content %}
+<h2>Profil</h2>
+<p><strong>Kullanıcı Adı:</strong> {{ user.username }}</p>
+<p><strong>E-posta:</strong> {{ user.email }}</p>
+{% if user_profile %}
+  <p><strong>Cinsiyet:</strong> {{ user_profile.gender }}</p>
+  <p><strong>Deneyim Seviyesi:</strong> {{ user_profile.experience_level }}</p>
+{% endif %}
 
-<h2 class="mb-4">Profil Bilgilerim</h2>
-
-<div class="row">
-  <div class="col-md-6">
-    <div class="card shadow-sm mb-3">
-      <div class="card-body">
-        <h5 class="card-title">
-          Merhaba, {{ profile.name if profile.name else user.username }}!
-        </h5>
-        <p class="card-text">
-          <strong>Yaş:</strong> {{ profile.age }} <br>
-          <strong>Burç:</strong> {{ profile.zodiac }} <br>
-          <strong>Cinsiyet:</strong> {{ profile.gender }} <br>
-          <strong>Deneyim Seviyesi:</strong> {{ profile.experience_level }} <br>
-          <strong>Boy:</strong> {{ profile.height }} cm<br>
-          <strong>Kilo:</strong> {{ profile.weight }} kg<br>
-          <strong>Hedefler:</strong> {{ profile.goals }}<br>
-        </p>
-      </div>
-    </div>
-  </div>
-
-  <div class="col-md-6">
-    <div class="card shadow-sm">
-      <div class="card-body">
-        <h5 class="card-title">Kullanıcı Bilgileri</h5>
-        <p class="card-text">
-          <strong>Email:</strong> {{ user.email }}<br>
-          <strong>Kullanıcı Adı:</strong> {{ user.username }}<br>
-          <strong>Oluşturulma Tarihi:</strong> {{ user.created_at }}<br>
-        </p>
-      </div>
-    </div>
-  </div>
-</div>
-
+<hr>
+<h3>Seçtiğiniz Programlar</h3>
+<ul>
+  {% for up in user_programs %}
+    <li>
+      {{ up.program.name }}
+      <!-- Programı puanlamak isterseniz: -->
+      <a href="{{ url_for('rate_program', program_id=up.program.id) }}"
+         class="btn btn-sm btn-outline-secondary ms-2">
+         Puan Ver / Yorum Yap
+      </a>
+    </li>
+  {% endfor %}
+</ul>
 {% endblock %}
