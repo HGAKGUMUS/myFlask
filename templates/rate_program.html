@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}Programı Puanla{% endblock %}
+{% block content %}
+
+<div class="row justify-content-center">
+  <div class="col-md-8">
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <h2 class="card-title">{{ program.name }} Programını Puanla</h2>
+        <form method="POST">
+          <div class="mb-3">
+            <label for="rating" class="form-label">Puan (1-5)</label>
+            <select class="form-select" name="rating">
+              <option value="1">1 - Çok Kötü</option>
+              <option value="2">2 - Kötü</option>
+              <option value="3" selected>3 - Orta</option>
+              <option value="4">4 - İyi</option>
+              <option value="5">5 - Çok İyi</option>
+            </select>
+          </div>
+
+          <div class="mb-3">
+            <label for="feedback" class="form-label">Yorum</label>
+            <textarea class="form-control" name="feedback" rows="3"></textarea>
+          </div>
+
+          <div class="mb-3">
+            <label for="duration" class="form-label">Kullanım Süresi (dakika)</label>
+            <input type="number" class="form-control" name="duration" value="0">
+            <small class="text-muted">Programı ne kadar süreyle kullandınız?</small>
+          </div>
+
+          <div class="mb-3">
+            <label for="progress" class="form-label">İlerleme (%)</label>
+            <input type="number" step="0.1" class="form-control" name="progress" value="0">
+            <small class="text-muted">Programda ne kadar ilerlediniz?</small>
+          </div>
+
+          <button type="submit" class="btn btn-primary w-100">Gönder</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

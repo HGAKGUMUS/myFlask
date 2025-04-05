@@ -1,10 +1,16 @@
 import os
 import re
-from datetime import datetime
-from flask import Flask, request, session, render_template, redirect, url_for, flash, jsonify
+from datetime import datetime, date
+from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from sqlalchemy import text  # Eklenen import
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import LabelEncoder
+from xgboost import XGBRegressor
+from lightgbm import LGBMRegressor
+from catboost import CatBoostRegressor
 
 app = Flask(__name__)
 app.secret_key = "dev_secret_key"  # Üretimde environment variable kullanın
@@ -69,7 +75,7 @@ class Category(db.Model):
     name = db.Column(db.String(100), unique=True, nullable=False)
 
 class Program(db.Model):
-    __tablename__ = "programs"
+    __tablename__ = 'programs'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), unique=True, nullable=False)
     category_id = db.Column(db.Integer, db.ForeignKey('categories.id'), nullable=False)
@@ -80,6 +86,19 @@ class Program(db.Model):
     notes = db.Column(db.Text)
     gender = db.Column(db.String(10), default="unisex")  # female, male, unisex
     category = db.relationship('Category', backref=db.backref('programs', lazy=True))
+    difficulty = db.Column(db.Integer)  # Program zorluk seviyesi
+    type = db.Column(db.String(50))      # Program türü (örn. Kardiyo, Ağırlık)
+
+class UserProgramRating(db.Model):
+    __tablename__ = 'user_program_ratings'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    program_id = db.Column(db.Integer, db.ForeignKey('programs.id'), nullable=False)
+    rating = db.Column(db.Integer, nullable=False)  # 1-5 arası puan
+    feedback = db.Column(db.Text)                   # Yorum
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+    duration = db.Column(db.Integer)              # Kullanım süresi (dakika)
+    progress = db.Column(db.Float)                # İlerleme (%)
 
 class WatchLog(db.Model):
     __tablename__ = "watch_logs"
@@ -101,7 +120,7 @@ class UserProgram(db.Model):
     
     user = db.relationship('User', backref=db.backref('user_programs', lazy=True))
     program = db.relationship('Program', backref=db.backref('user_programs', lazy=True))
-
+    
 # --------------------------------------
 # Şifre Validasyonu
 # --------------------------------------
@@ -170,7 +189,9 @@ def create_tables():
                 duration=30,
                 rest_intervals="Set arası 1 dk",
                 notes="Doğru formu koruyun.",
-                gender="female"
+                gender="female",
+                difficulty=1,
+                type=cat.name
             )
             prog_basic_m = Program(
                 name=f"Beginner {cat.name} (Erkek)",
@@ -180,7 +201,9 @@ def create_tables():
                 duration=30,
                 rest_intervals="Set arası 1 dk",
                 notes="Temel hareketler, form önemli.",
-                gender="male"
+                gender="male",
+                difficulty=1,
+                type=cat.name
             )
             prog_adv_f = Program(
                 name=f"Advanced {cat.name} (Kadın)",
@@ -190,7 +213,9 @@ def create_tables():
                 duration=45,
                 rest_intervals="Set arası 1.5 dk",
                 notes="Ağır kilolarda dikkat.",
-                gender="female"
+                gender="female",
+                difficulty=3,
+                type=cat.name
             )
             prog_adv_m = Program(
                 name=f"Advanced {cat.name} (Erkek)",
@@ -200,7 +225,9 @@ def create_tables():
                 duration=45,
                 rest_intervals="Set arası 1.5 dk",
                 notes="Ağır çalışmada form çok önemli.",
-                gender="male"
+                gender="male",
+                difficulty=3,
+                type=cat.name
             )
             programs.extend([prog_basic_f, prog_basic_m, prog_adv_f, prog_adv_m])
 
@@ -213,7 +240,9 @@ def create_tables():
             duration=35,
             rest_intervals="Set arası 1 dk, günler arasında 1 gün dinlenme",
             notes="Yeni başlayan kadınlar için 3 günlük program.",
-            gender="female"
+            gender="female",
+            difficulty=2,
+            type="Fitness"
         )
         prog_split_basic_m = Program(
             name="Beginner 3-Day Split (Erkek)",
@@ -223,7 +252,9 @@ def create_tables():
             duration=40,
             rest_intervals="Set arası 1 dk, günler arasında 1 gün dinlenme",
             notes="Yeni başlayan erkekler için 3 günlük program.",
-            gender="male"
+            gender="male",
+            difficulty=2,
+            type="Fitness"
         )
         prog_split_adv_f = Program(
             name="Advanced 3-Day Split (Kadın)",
@@ -233,7 +264,9 @@ def create_tables():
             duration=60,
             rest_intervals="Set arası 1.5-2 dk, günler arasında 1 gün dinlenme",
             notes="İleri seviye kadınlar için split program.",
-            gender="female"
+            gender="female",
+            difficulty=4,
+            type="Fitness"
         )
         prog_split_adv_m = Program(
             name="Advanced 3-Day Split (Erkek)",
@@ -243,7 +276,9 @@ def create_tables():
             duration=70,
             rest_intervals="Set arası 1.5-2 dk, günler arasında 1 gün dinlenme",
             notes="İleri seviye erkekler için split program.",
-            gender="male"
+            gender="male",
+            difficulty=4,
+            type="Fitness"
         )
         programs.extend([prog_split_basic_f, prog_split_basic_m, prog_split_adv_f, prog_split_adv_m])
 
