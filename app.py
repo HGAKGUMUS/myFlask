@@ -510,6 +510,42 @@ def choose_program(program_id):
     else:
         flash("Program bulunamadı!")
     return redirect(url_for("sports"))
+    
+    # --------------------------------------
+# PROGRAMI PUANLAMA (RATE PROGRAM)
+# --------------------------------------
+@app.route("/rate_program/<int:program_id>", methods=["GET", "POST"])
+def rate_program(program_id):
+    user_id = session.get("user_id")
+    if not user_id:
+        flash("Puan vermek için önce giriş yapın.")
+        return redirect(url_for("login"))
+
+    program = Program.query.get_or_404(program_id)
+
+    if request.method == "POST":
+        rating   = int(request.form.get("rating", 0))
+        feedback = request.form.get("feedback")
+        duration = request.form.get("duration")
+        progress = request.form.get("progress")
+
+        new_rating = UserProgramRating(
+            user_id   = user_id,
+            program_id= program_id,
+            rating    = rating,
+            feedback  = feedback,
+            duration  = int(duration) if duration else None,
+            progress  = float(progress) if progress else None
+        )
+        db.session.add(new_rating)
+        db.session.commit()
+
+        flash("Puanınız kaydedildi, teşekkürler!")
+        return redirect(url_for("sports"))
+
+    # GET isteği ise formu göster
+    return render_template("rate_program.html", program=program)
+
 
 # --------------------------------------
 # PROFİL SAYFASI (YENİ) - Kullanıcının detaylarını gösterir
