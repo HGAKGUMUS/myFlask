@@ -512,6 +512,10 @@ def sports():
 
     # >>> yeni satır – doğru girintiyle <<<
     recommended_programs = recommend_for_user(user)
+    
+    # — Önerilenlerde olanları genel listeden çıkar —
+    recommended_ids = {p.id for p in recommended_programs}
+    programs = [p for p in programs if p.id not in recommended_ids]
 
     modal_cfg = session.pop("next_step_modal", None)
 

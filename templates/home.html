@@ -9,7 +9,10 @@
       <p class="col-md-8 fs-4">Kişiselleştirilmiş spor programlarına erişebilir, profilini yönetebilirsin.</p>
       <a class="btn btn-primary btn-lg" href="{{ url_for('sports') }}" role="button">Programlara Göz At</a>
     {% else %}
-      <p class="col-md-8 fs-4">Sitemize üye olarak ücretsiz spor programlarına ulaşabilirsiniz.</p>
+      <p class="col-md-8 fs-4">Üye olarak ücretsiz spor programlarına ulaşabilirsiniz.</p>
+	  <p class="text-muted" style="font-size:0.9rem;">
+	  Akademik proje kapsamında bilgileriniz alınacaktır.
+	  </p>
       <a class="btn btn-primary btn-lg" href="{{ url_for('login') }}" role="button">Giriş Yap</a>
       <a class="btn btn-success btn-lg" href="{{ url_for('register') }}" role="button">Kayıt Ol</a>
     {% endif %}

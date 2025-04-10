@@ -12,7 +12,8 @@
 
 {# ---------------- ÖNERİLENLER ---------------- #}
 {% if recommended_programs %}
-  <h2>Size Özel Öneriler</h2>
+	{# ÖNERİLENLER başlığı #}
+  <h2 class="text-primary">Size Özel Öneriler</h2>
   <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
     {% for program in recommended_programs %}
       <div class="col">
@@ -52,7 +53,8 @@
 {% endif %}
 
 {# ---------------- TÜM PROGRAMLAR ---------------- #}
-<h2 class="mt-5">Tüm Programlar</h2>
+{# TÜM PROGRAMLAR başlığı #}
+<h2 class="mt-5 text-success">Tüm Programlar</h2>
 <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
   {% for program in programs %}
     <div class="col">
@@ -76,7 +78,7 @@
             <strong>Dinlenme:</strong> {{ program.rest_intervals }}
           </p>
           <p class="small text-muted">
-            {{ program.exercise_steps[:60] }}{% if program.exercise_steps|length > 60 %}...{% endif %}
+            {{ program.exercise_steps }}
           </p>
         </div>
         <div class="card-footer bg-white border-0">
