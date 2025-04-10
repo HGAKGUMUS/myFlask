@@ -3,6 +3,7 @@ import re
 from datetime import datetime, date
 from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify
 from flask_sqlalchemy import SQLAlchemy
+from flask import Markup   # dosyanın başında varsa gerek yok
 from werkzeug.security import generate_password_hash, check_password_hash
 from sqlalchemy import text, or_, func
 import pandas as pd
@@ -513,10 +514,13 @@ def sports():
     # >>> yeni satır – doğru girintiyle <<<
     recommended_programs = recommend_for_user(user)
 
+    modal_cfg = session.pop("next_step_modal", None)
+
     return render_template(
         "sports.html",
         programs=programs,
-        recommended_programs=recommended_programs
+        recommended_programs=recommended_programs,
+        modal_cfg=modal_cfg 
     )
 
 # --------------------------------------
@@ -571,7 +575,6 @@ def rate_program(program_id):
     if request.method == "POST":
         # --- 1. Form değerlerini al ---
         rating_val   = request.form.get("rating", "0")
-        feedback_txt = request.form.get("feedback", "").strip()
         duration_val = request.form.get("duration", "")
         progress_val = request.form.get("progress", "")
 
@@ -605,12 +608,30 @@ def rate_program(program_id):
             user_id   = user_id,
             program_id= program_id,
             rating    = rating,
-            feedback  = feedback_txt if feedback_txt else None,
             duration  = duration,
             progress  = progress
         )
         db.session.add(new_rating)
         db.session.commit()
+        
+        # >>>  BURADAN İTİBAREN EKLEYİN  <<<
+        if rating >= 4 and (progress or 0) >= 70:
+            # ileri seviye öner
+            session["next_step_modal"] = {
+                "title":  "Tebrikler!",
+                "body":   "Bu programı neredeyse tamamladınız. İleri seviye bir programa geçmek ister misiniz?",
+                "btn_txt": "İleri Seviye Programları Göster",
+                "btn_url": url_for("sports", show_all="true")
+            }
+        elif rating <= 2:
+            # daha kolay öner
+            session["next_step_modal"] = {
+                "title":  "Zor mu geldi?",
+                "body":   "Sizin için daha kolay programlar seçtik.",
+                "btn_txt": "Daha Kolay Programları Gör",
+                "btn_url": url_for("sports", show_all="true")
+            }
+        # <<<  EKLEME BİTTİ  >>>
 
         flash("Puanınız kaydedildi, teşekkürler!")
         return redirect(url_for("sports"))

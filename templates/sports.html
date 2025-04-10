@@ -89,5 +89,31 @@
     </div>
   {% endfor %}
 </div>
+{% if modal_cfg %}
+  <!-- Next‑Step Modal -->
+  <div class="modal fade" id="nextStepModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">{{ modal_cfg.title }}</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          {{ modal_cfg.body }}
+        </div>
+        <div class="modal-footer">
+          <a href="{{ modal_cfg.btn_url }}" class="btn btn-primary w-100">
+            {{ modal_cfg.btn_txt }}
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
 
+  <!-- Modal'ı otomatik aç -->
+  <script>
+    const m = new bootstrap.Modal(document.getElementById('nextStepModal'));
+    m.show();
+  </script>
+{% endif %}
 {% endblock %}
