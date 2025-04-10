@@ -1,17 +1,16 @@
 {% extends "base.html" %}
- {% block title %}Spor Programları{% endblock %}
- {% block content %}
- 
+{% block title %}Spor Programları{% endblock %}
 
- <div class="d-flex justify-content-between align-items-center mb-4">
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
   <h2 class="mb-0">Spor Programları</h2>
   <a href="{{ url_for('sports', show_all='true') }}" class="btn btn-secondary">
     Daha Fazla Göster
   </a>
- </div>
- 
+</div>
 
- {% if recommended_programs %}
+{% if recommended_programs %}
   <h2>Size Özel Öneriler</h2>
   <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
     {% for program in recommended_programs %}
@@ -28,7 +27,11 @@
               <strong>Dinlenme:</strong> {{ program.rest_intervals }}
             </p>
             <p class="small text-muted">
-              {{ program.exercise_steps[0:60] }}{% if program.exercise_steps|length > 60 %}...{% endif %}
+              {% if program.exercise_steps %}
+                {{ program.exercise_steps[0:60] }}{% if program.exercise_steps|length > 60 %}...{% endif %}
+              {% else %}
+                Bilgi yok.
+              {% endif %}
             </p>
           </div>
           <div class="card-footer bg-white border-0">
@@ -43,13 +46,12 @@
       </div>
     {% endfor %}
   </div>
- {% else %}
+{% else %}
   <p>Size özel öneriler bulunamadı.</p>
- {% endif %}
- 
+{% endif %}
 
- <h2>Tüm Programlar</h2>
- <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+<h2>Tüm Programlar</h2>
+<div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
   {% for program in programs %}
     <div class="col">
       <div class="card h-100 shadow-sm">
@@ -64,7 +66,11 @@
             <strong>Dinlenme:</strong> {{ program.rest_intervals }}
           </p>
           <p class="small text-muted">
-            {{ program.exercise_steps[0:60] }}{% if program.exercise_steps|length > 60 %}...{% endif %}
+            {% if program.exercise_steps %}
+              {{ program.exercise_steps[0:60] }}{% if program.exercise_steps|length > 60 %}...{% endif %}
+            {% else %}
+              Bilgi yok.
+            {% endif %}
           </p>
         </div>
         <div class="card-footer bg-white border-0">
@@ -78,7 +84,6 @@
       </div>
     </div>
   {% endfor %}
- </div>
- 
+</div>
 
- {% endblock %}
+{% endblock %}
