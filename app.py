@@ -493,31 +493,32 @@ def sports():
     if not user_id:
         flash("Programları görmek için önce giriş yapın.")
         return redirect(url_for("login"))
-    
+
     user = User.query.get(user_id)
     if not user or not user.profile:
         flash("Profil bilgileriniz eksik. Lütfen profilinizi güncelleyin.")
         return redirect(url_for("home"))
-    
+
     from sqlalchemy import or_, func
     show_all = request.args.get("show_all", "false").lower() == "true"
     query = Program.query
     if not show_all:
         auto_gender = user.profile.gender if user.profile.gender else "unisex"
-        auto_level = user.profile.experience_level.strip() if user.profile.experience_level else ""
+        auto_level  = user.profile.experience_level.strip() if user.profile.experience_level else ""
         query = query.filter(or_(Program.gender == auto_gender, Program.gender == "unisex"))
         if auto_level:
             query = query.filter(func.lower(Program.level) == auto_level.lower())
-    
-    programs = query.order_by(Program.name).all()
-            # Öneriler:
-        recommended_programs = recommend_for_user(user)  # eski boş liste yerine
-        return render_template("sports.html",
-                               programs=programs,
-                               recommended_programs=recommended_programs)
-    
-    return render_template("sports.html", programs=programs, recommended_programs=recommended_programs)
 
+    programs = query.order_by(Program.name).all()
+
+    # >>> yeni satır – doğru girintiyle <<<
+    recommended_programs = recommend_for_user(user)
+
+    return render_template(
+        "sports.html",
+        programs=programs,
+        recommended_programs=recommended_programs
+    )
 
 # --------------------------------------
 # KULLANICININ SEÇTİĞİ PROGRAMI İŞLEME (CHOOSE PROGRAM)
