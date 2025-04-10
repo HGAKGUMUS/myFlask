@@ -486,7 +486,10 @@ def sports():
             query = query.filter(func.lower(Program.level) == auto_level.lower())
     
     programs = query.order_by(Program.name).all()
-    return render_template("sports.html", programs=programs)
+    recommended_programs = []  # Şimdilik öneri algoritmanız yoksa boş liste gönderiyoruz.
+    
+    return render_template("sports.html", programs=programs, recommended_programs=recommended_programs)
+
 
 # --------------------------------------
 # KULLANICININ SEÇTİĞİ PROGRAMI İŞLEME (CHOOSE PROGRAM)
