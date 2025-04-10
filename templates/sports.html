@@ -18,11 +18,13 @@
         <div class="card h-100 shadow-sm">
           <div class="card-body">
             <h5 class="card-title">{{ program.name }} (Önerilen)</h5>
+			
 			{% set avg, cnt = program_stats(program.id) %}
 			<p class="mb-1">
-			  ⭐ {{ "%.1f"|format(avg) }} / 5
-			  <span class="text-muted">({{ cnt }} oy)</span>
+			  <small class="text-muted">id={{ program.id }}</small><br>
+			  ⭐ {{ "%.1f"|format(avg) }} / 5 ({{ cnt }} oy)
 			</p>
+			
             <p class="card-text">
               <strong>Seviye:</strong> {{ program.level }} <br>
               <strong>Süre:</strong> {{ program.duration }} dk <br>
