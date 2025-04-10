@@ -3,7 +3,6 @@ import re
 from datetime import datetime, date
 from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify
 from flask_sqlalchemy import SQLAlchemy
-from flask import Markup   # dosyanın başında varsa gerek yok
 from werkzeug.security import generate_password_hash, check_password_hash
 from sqlalchemy import text, or_, func
 import pandas as pd
