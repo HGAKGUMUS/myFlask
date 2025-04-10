@@ -26,6 +26,10 @@
               <strong>Tür:</strong> {{ program.type }} <br>
               <strong>Dinlenme:</strong> {{ program.rest_intervals }}
             </p>
+			{% set avg, cnt = program_stats(program.id) %}
+			<p>
+			  ⭐ {{ "%.1f"|format(avg) }} / 5 ({{ cnt }} oy)
+			</p>
             <p class="small text-muted">
               {% if program.exercise_steps %}
                 {{ program.exercise_steps[0:60] }}{% if program.exercise_steps|length > 60 %}...{% endif %}
