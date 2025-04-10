@@ -18,7 +18,6 @@ app.secret_key = "dev_secret_key"  # Üretimde environment variable kullanın
 # --------------------------------------
 # 1) VERİTABANI AYARI
 # --------------------------------------
-# Railway veritabanı bağlantı dizesi; search_path "public" olarak ayarlanıyor:
 default_db_url = "postgresql://postgres:LKLdBTyibvuWNWGBSdgdUvniNRPJQTwG@switchyard.proxy.rlwy.net:15854/railway?options=-c%20search_path=public"
 db_url = os.environ.get("DATABASE_URL", default_db_url)
 db_url = db_url.strip().lstrip("=")
@@ -30,6 +29,14 @@ elif db_url.startswith("postgresql://") and not db_url.startswith("postgresql+")
 app.config["SQLALCHEMY_DATABASE_URI"] = db_url
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 db = SQLAlchemy(app)
+
+# --------------------------------------
+# Helper Fonksiyonu
+# --------------------------------------
+def get_checkbox_values(field):
+    # Checkbox alanından gelen birden fazla değeri liste olarak alır, virgülle ayrılmış string döndürür.
+    values = request.form.getlist(field)
+    return ",".join(values) if values else None
 
 # --------------------------------------
 # 2) MODELLER (Tablolar)
@@ -56,15 +63,15 @@ class UserProfile(db.Model):
     goals = db.Column(db.Text)
     city_id = db.Column(db.Integer, db.ForeignKey("cities.city_id"))
     district_id = db.Column(db.Integer, db.ForeignKey("districts.district_id"))
-    
     # Yeni eklenen alanlar:
-    injury_history = db.Column(db.Text)
-    surgery_history = db.Column(db.Text)
+    injury_history = db.Column(db.Text)  # Eğer ileride kullanmak isterseniz (HTML'de yer yoksa boş bırakılabilir)
+    surgery_history = db.Column(db.String(100))
     medications = db.Column(db.Text)
     chronic_conditions = db.Column(db.Text)
-    activity_level = db.Column(db.String(20))
-    nutrition = db.Column(db.String(20))
-
+    activity_level = db.Column(db.String(20))  # Eğer HTML'de eklenmezse None kalır
+    nutrition = db.Column(db.String(20))       # Eğer HTML'de eklenmezse None kalır
+    supplement_usage = db.Column(db.Text)
+    daily_water_intake = db.Column(db.String(20))
 
 class City(db.Model):
     __tablename__ = "cities"
@@ -106,8 +113,8 @@ class UserProgramRating(db.Model):
     rating = db.Column(db.Integer, nullable=False)  # 1-5 arası puan
     feedback = db.Column(db.Text)                   # Yorum
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
-    duration = db.Column(db.Integer)              # Kullanım süresi (dakika)
-    progress = db.Column(db.Float)                # İlerleme (%)
+    duration = db.Column(db.Integer)                # Kullanım süresi (dakika)
+    progress = db.Column(db.Float)                  # İlerleme (%)
 
 class WatchLog(db.Model):
     __tablename__ = "watch_logs"
@@ -129,7 +136,7 @@ class UserProgram(db.Model):
     
     user = db.relationship('User', backref=db.backref('user_programs', lazy=True))
     program = db.relationship('Program', backref=db.backref('user_programs', lazy=True))
-    
+
 # --------------------------------------
 # Şifre Validasyonu
 # --------------------------------------
@@ -148,37 +155,46 @@ def validate_password(pw):
 # Tabloları Oluşturma ve Örnek Veriler Ekleme
 # --------------------------------------
 def create_tables():
-    # Public şemayı temizle ve yeniden oluşturmak istiyorsanız açın:
-    # db.session.execute(text("DROP SCHEMA public CASCADE; CREATE SCHEMA public; SET search_path TO public;"))
-    # db.session.commit()
-
     db.create_all()
     db.session.commit()
 
-    # Şehirler ve ilçeler ekleme (varsa)
+    # Şehirler ve ilçeler ekleme
     if not City.query.first():
         cities = [
             City(city_name="Istanbul"),
             City(city_name="Ankara"),
-            City(city_name="Izmir")
+            City(city_name="Izmir"),
+            City(city_name="Eskişehir")
         ]
         db.session.add_all(cities)
         db.session.commit()
+
+        # İstanbul ilçeleri (örnek)
         istanbul = City.query.filter_by(city_name="Istanbul").first()
+        istanbul_districts = ["Kadıköy", "Beşiktaş", "Üsküdar", "Sarıyer", "Bakırköy", "Ataşehir"]
+        for dist in istanbul_districts:
+            db.session.add(District(city_id=istanbul.city_id, district_name=dist))
+        
+        # Ankara ilçeleri (örnek)
         ankara = City.query.filter_by(city_name="Ankara").first()
+        ankara_districts = ["Çankaya", "Keçiören", "Altındağ", "Mamak", "Etimesgut"]
+        for dist in ankara_districts:
+            db.session.add(District(city_id=ankara.city_id, district_name=dist))
+        
+        # İzmir ilçeleri (örnek)
         izmir = City.query.filter_by(city_name="Izmir").first()
-        districts = [
-            District(city_id=istanbul.city_id, district_name="Kadıköy"),
-            District(city_id=istanbul.city_id, district_name="Beşiktaş"),
-            District(city_id=ankara.city_id, district_name="Çankaya"),
-            District(city_id=ankara.city_id, district_name="Keçiören"),
-            District(city_id=izmir.city_id, district_name="Bornova"),
-            District(city_id=izmir.city_id, district_name="Karşıyaka")
-        ]
-        db.session.add_all(districts)
+        izmir_districts = ["Bornova", "Karşıyaka", "Konak", "Buca", "Alsancak"]
+        for dist in izmir_districts:
+            db.session.add(District(city_id=izmir.city_id, district_name=dist))
+        
+        # Eskişehir ilçeleri - sadece "Odunpazarı" ve "Tepebaşı"
+        eskisehir = City.query.filter_by(city_name="Eskişehir").first()
+        eskisehir_districts = ["Odunpazarı", "Tepebaşı"]
+        for dist in eskisehir_districts:
+            db.session.add(District(city_id=eskisehir.city_id, district_name=dist))
+        
         db.session.commit()
 
-    # Kategoriler (Fitness vs.) ve Programlar ekleme (varsa)
     if not Category.query.first():
         sports_categories = ["Futbol", "Basketbol", "Tenis", "Yüzme", "Yoga", "Fitness", "Boks", "Koşu"]
         for cat_name in sports_categories:
@@ -188,7 +204,6 @@ def create_tables():
         categories = Category.query.all()
 
         programs = []
-        # Her kategoriye örnek programlar
         for cat in categories:
             prog_basic_f = Program(
                 name=f"Beginner {cat.name} (Kadın)",
@@ -240,7 +255,6 @@ def create_tables():
             )
             programs.extend([prog_basic_f, prog_basic_m, prog_adv_f, prog_adv_m])
 
-        # Fitness kategorisi (ID=3 olabilir) için 3 günlük split örnek
         prog_split_basic_f = Program(
             name="Beginner 3-Day Split (Kadın)",
             category_id=3,
@@ -290,7 +304,6 @@ def create_tables():
             type="Fitness"
         )
         programs.extend([prog_split_basic_f, prog_split_basic_m, prog_split_adv_f, prog_split_adv_m])
-
         db.session.add_all(programs)
         db.session.commit()
 
@@ -326,10 +339,20 @@ def register():
         goals = request.form.get("goals")
         
         # Yeni eklenen alanlar:
-        injury_history = request.form.get("injury_history")
+        # "Kronik Hastalıklar" checkbox alanından gelen verileri alıyoruz.
+        chronic_conditions = get_checkbox_values("chronic_conditions_options")
+        # "Ameliyat Geçmişi" dropdown seçim değeri:
         surgery_history = request.form.get("surgery_history")
-        medications = request.form.get("medications")
-        chronic_conditions = request.form.get("chronic_conditions")
+        # İlaç kullanımı için radyo buton değeri:
+        drug_usage = request.form.get("drug_usage")  # "evet" veya "hayır"
+        # Eğer "evet" ise ilaç seçimi checkboxlarından gelen verileri alıyoruz.
+        medications = get_checkbox_values("drug_options") if drug_usage == "evet" else None
+        # Supplement kullanımı checkboxlarından gelen verileri alıyoruz.
+        supplement_usage = get_checkbox_values("supplement_options")
+        # Günlük su miktarı dropdown değeri:
+        daily_water_intake = request.form.get("daily_water_intake")
+        
+        # activity_level ve nutrition HTML formunda alan yoksa None kalır.
         activity_level = request.form.get("activity_level")
         nutrition = request.form.get("nutrition")
         
@@ -372,10 +395,11 @@ def register():
             goals=goals,
             city_id=int(city_id) if city_id else None,
             district_id=int(district_id) if district_id else None,
-            injury_history=injury_history,
+            chronic_conditions=chronic_conditions,
             surgery_history=surgery_history,
             medications=medications,
-            chronic_conditions=chronic_conditions,
+            supplement_usage=supplement_usage,
+            daily_water_intake=daily_water_intake,
             activity_level=activity_level,
             nutrition=nutrition
         )
@@ -388,7 +412,6 @@ def register():
     cities = City.query.all()
     return render_template("register.html", cities=cities)
 
-
 # --------------------------------------
 # KULLANICI GİRİŞ (LOGIN)
 # --------------------------------------
@@ -397,7 +420,6 @@ def login():
     if request.method == "POST":
         username = request.form.get("username")
         password = request.form.get("password")
-        
         user = User.query.filter_by(username=username).first()
         if not user:
             flash("Kullanıcı bulunamadı!")
@@ -453,16 +475,12 @@ def sports():
         flash("Profil bilgileriniz eksik. Lütfen profilinizi güncelleyin.")
         return redirect(url_for("home"))
     
-    # Kullanıcının profilinden cinsiyet ve deneyim seviyesini alıyoruz:
-    auto_gender = user.profile.gender if user.profile.gender else "unisex"
-    auto_level = user.profile.experience_level.strip() if user.profile.experience_level else ""
-    
-    # "Daha fazla göster" seçeneği: /sports?show_all=true
+    from sqlalchemy import or_, func
     show_all = request.args.get("show_all", "false").lower() == "true"
-    
     query = Program.query
     if not show_all:
-        from sqlalchemy import or_, func
+        auto_gender = user.profile.gender if user.profile.gender else "unisex"
+        auto_level = user.profile.experience_level.strip() if user.profile.experience_level else ""
         query = query.filter(or_(Program.gender == auto_gender, Program.gender == "unisex"))
         if auto_level:
             query = query.filter(func.lower(Program.level) == auto_level.lower())
