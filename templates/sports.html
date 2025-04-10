@@ -10,6 +10,7 @@
   </a>
 </div>
 
+{# ---------------- ÖNERİLENLER ---------------- #}
 {% if recommended_programs %}
   <h2>Size Özel Öneriler</h2>
   <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
@@ -17,14 +18,15 @@
       <div class="col">
         <div class="card h-100 shadow-sm">
           <div class="card-body">
-            <h5 class="card-title">{{ program.name }} (Önerilen)</h5>
-			
-			{% set avg, cnt = program_stats(program.id) %}
-			<p class="mb-1">
-			  <small class="text-muted">id={{ program.id }}</small><br>
-			  ⭐ {{ "%.1f"|format(avg) }} / 5 ({{ cnt }} oy)
-			</p>
-			
+            <h5 class="card-title">{{ program.name }} <span class="badge bg-info">Önerilen</span></h5>
+
+            {# ⭐ / oy satırı #}
+            {% set avg, cnt = program_stats(program.id) %}
+            <p class="mb-1">
+              ⭐ {{ "%.1f"|format(avg) }} / 5
+              <span class="text-muted">({{ cnt }} oy)</span>
+            </p>
+
             <p class="card-text">
               <strong>Seviye:</strong> {{ program.level }} <br>
               <strong>Süre:</strong> {{ program.duration }} dk <br>
@@ -34,20 +36,12 @@
               <strong>Dinlenme:</strong> {{ program.rest_intervals }}
             </p>
             <p class="small text-muted">
-              {% if program.exercise_steps %}
-                {{ program.exercise_steps[0:60] }}{% if program.exercise_steps|length > 60 %}...{% endif %}
-              {% else %}
-                Bilgi yok.
-              {% endif %}
+              {{ program.exercise_steps[:60] }}{% if program.exercise_steps|length > 60 %}...{% endif %}
             </p>
           </div>
           <div class="card-footer bg-white border-0">
-            <a href="{{ url_for('choose_program', program_id=program.id) }}" class="btn btn-primary w-100">
-              Programı Seç
-            </a>
-            <a href="{{ url_for('rate_program', program_id=program.id) }}" class="btn btn-outline-info w-100 mt-2">
-              Puan Ver
-            </a>
+            <a href="{{ url_for('choose_program', program_id=program.id) }}" class="btn btn-primary w-100">Programı Seç</a>
+            <a href="{{ url_for('rate_program', program_id=program.id) }}" class="btn btn-outline-info w-100 mt-2">Puan Ver</a>
           </div>
         </div>
       </div>
@@ -57,13 +51,22 @@
   <p>Size özel öneriler bulunamadı.</p>
 {% endif %}
 
-<h2>Tüm Programlar</h2>
+{# ---------------- TÜM PROGRAMLAR ---------------- #}
+<h2 class="mt-5">Tüm Programlar</h2>
 <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
   {% for program in programs %}
     <div class="col">
       <div class="card h-100 shadow-sm">
         <div class="card-body">
           <h5 class="card-title">{{ program.name }}</h5>
+
+          {# ⭐ / oy satırı #}
+          {% set avg, cnt = program_stats(program.id) %}
+          <p class="mb-1">
+            ⭐ {{ "%.1f"|format(avg) }} / 5
+            <span class="text-muted">({{ cnt }} oy)</span>
+          </p>
+
           <p class="card-text">
             <strong>Seviye:</strong> {{ program.level }} <br>
             <strong>Süre:</strong> {{ program.duration }} dk <br>
@@ -73,27 +76,20 @@
             <strong>Dinlenme:</strong> {{ program.rest_intervals }}
           </p>
           <p class="small text-muted">
-            {% if program.exercise_steps %}
-              {{ program.exercise_steps[0:60] }}{% if program.exercise_steps|length > 60 %}...{% endif %}
-            {% else %}
-              Bilgi yok.
-            {% endif %}
+            {{ program.exercise_steps[:60] }}{% if program.exercise_steps|length > 60 %}...{% endif %}
           </p>
         </div>
         <div class="card-footer bg-white border-0">
-          <a href="{{ url_for('choose_program', program_id=program.id) }}" class="btn btn-primary w-100">
-            Programı Seç
-          </a>
-          <a href="{{ url_for('rate_program', program_id=program.id) }}" class="btn btn-outline-info w-100 mt-2">
-            Puan Ver
-          </a>
+          <a href="{{ url_for('choose_program', program_id=program.id) }}" class="btn btn-primary w-100">Programı Seç</a>
+          <a href="{{ url_for('rate_program', program_id=program.id) }}" class="btn btn-outline-info w-100 mt-2">Puan Ver</a>
         </div>
       </div>
     </div>
   {% endfor %}
 </div>
+
+{# ---------------- Modal (puan sonrası) ---------------- #}
 {% if modal_cfg %}
-  <!-- Next‑Step Modal -->
   <div class="modal fade" id="nextStepModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">
@@ -101,22 +97,17 @@
           <h5 class="modal-title">{{ modal_cfg.title }}</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
-        <div class="modal-body">
-          {{ modal_cfg.body }}
-        </div>
+        <div class="modal-body">{{ modal_cfg.body }}</div>
         <div class="modal-footer">
-          <a href="{{ modal_cfg.btn_url }}" class="btn btn-primary w-100">
-            {{ modal_cfg.btn_txt }}
-          </a>
+          <a href="{{ modal_cfg.btn_url }}" class="btn btn-primary w-100">{{ modal_cfg.btn_txt }}</a>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Modal'ı otomatik aç -->
   <script>
-    const m = new bootstrap.Modal(document.getElementById('nextStepModal'));
-    m.show();
+    new bootstrap.Modal(document.getElementById('nextStepModal')).show();
   </script>
 {% endif %}
+
 {% endblock %}
