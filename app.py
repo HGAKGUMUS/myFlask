@@ -56,6 +56,15 @@ class UserProfile(db.Model):
     goals = db.Column(db.Text)
     city_id = db.Column(db.Integer, db.ForeignKey("cities.city_id"))
     district_id = db.Column(db.Integer, db.ForeignKey("districts.district_id"))
+    
+    # Yeni eklenen alanlar:
+    injury_history = db.Column(db.Text)
+    surgery_history = db.Column(db.Text)
+    medications = db.Column(db.Text)
+    chronic_conditions = db.Column(db.Text)
+    activity_level = db.Column(db.String(20))
+    nutrition = db.Column(db.String(20))
+
 
 class City(db.Model):
     __tablename__ = "cities"
@@ -309,12 +318,20 @@ def register():
         city_id = request.form.get("city")
         district_id = request.form.get("district")
         
-        # Yeni eklenen alanlar:
+        # Mevcut alanlar:
         gender = request.form.get("gender")
         height_str = request.form.get("height")
         weight_str = request.form.get("weight")
         experience_level = request.form.get("experience_level")
         goals = request.form.get("goals")
+        
+        # Yeni eklenen alanlar:
+        injury_history = request.form.get("injury_history")
+        surgery_history = request.form.get("surgery_history")
+        medications = request.form.get("medications")
+        chronic_conditions = request.form.get("chronic_conditions")
+        activity_level = request.form.get("activity_level")
+        nutrition = request.form.get("nutrition")
         
         existing = User.query.filter_by(username=username).first()
         if existing:
@@ -354,7 +371,13 @@ def register():
             experience_level=experience_level,
             goals=goals,
             city_id=int(city_id) if city_id else None,
-            district_id=int(district_id) if district_id else None
+            district_id=int(district_id) if district_id else None,
+            injury_history=injury_history,
+            surgery_history=surgery_history,
+            medications=medications,
+            chronic_conditions=chronic_conditions,
+            activity_level=activity_level,
+            nutrition=nutrition
         )
         db.session.add(new_profile)
         db.session.commit()
@@ -364,6 +387,7 @@ def register():
     
     cities = City.query.all()
     return render_template("register.html", cities=cities)
+
 
 # --------------------------------------
 # KULLANICI GİRİŞ (LOGIN)

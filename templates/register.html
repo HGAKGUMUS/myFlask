@@ -52,8 +52,6 @@
             <label for="age" class="form-label">Yaş</label>
             <input type="number" class="form-control" name="age">
           </div>
-          
-          <!-- Yeni Alanlar -->
           <div class="mb-3">
             <label for="gender" class="form-label">Cinsiyet</label>
             <select class="form-select" name="gender">
@@ -83,6 +81,44 @@
           <div class="mb-3">
             <label for="goals" class="form-label">Hedefler</label>
             <textarea class="form-control" name="goals" rows="3"></textarea>
+          </div>
+
+          <!-- Sağlık ve Ek Bilgiler -->
+          <h4>Sağlık ve Ek Bilgiler</h4>
+          <div class="mb-3">
+            <label for="injury_history" class="form-label">Sakatlık Geçmişi</label>
+            <textarea class="form-control" name="injury_history" rows="2" placeholder="Önceden yaşadığınız sakatlıklar, bölge, tarih vs."></textarea>
+          </div>
+          <div class="mb-3">
+            <label for="surgery_history" class="form-label">Ameliyat Geçmişi</label>
+            <textarea class="form-control" name="surgery_history" rows="2" placeholder="Geçirdiğiniz ameliyatlar, tarihleri vb."></textarea>
+          </div>
+          <div class="mb-3">
+            <label for="medications" class="form-label">Kullandığınız İlaçlar</label>
+            <textarea class="form-control" name="medications" rows="2" placeholder="Düzenli olarak kullandığınız ilaçlar"></textarea>
+          </div>
+          <div class="mb-3">
+            <label for="chronic_conditions" class="form-label">Kronik Hastalıklar</label>
+            <textarea class="form-control" name="chronic_conditions" rows="2" placeholder="Diyabet, hipertansiyon gibi kronik hastalıklar"></textarea>
+          </div>
+          <div class="mb-3">
+            <label for="activity_level" class="form-label">Günlük Aktivite Düzeyi</label>
+            <select class="form-select" name="activity_level">
+              <option value="">Seçiniz</option>
+              <option value="low">Düşük</option>
+              <option value="moderate">Orta</option>
+              <option value="high">Yüksek</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label for="nutrition" class="form-label">Beslenme Tarzınız</label>
+            <select class="form-select" name="nutrition">
+              <option value="">Seçiniz</option>
+              <option value="standard">Standart</option>
+              <option value="vegetarian">Vejetaryen</option>
+              <option value="vegan">Vegan</option>
+              <option value="high_protein">Yüksek Protein</option>
+            </select>
           </div>
 
           <!-- Şehir / İlçe -->
