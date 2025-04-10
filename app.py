@@ -11,6 +11,8 @@ from sklearn.preprocessing import LabelEncoder
 from xgboost import XGBRegressor
 from lightgbm import LGBMRegressor
 from catboost import CatBoostRegressor
+from sqlalchemy import func    # zaten or_, text var; func yoksa ekle
+
 
 app = Flask(__name__)
 app.secret_key = "dev_secret_key"  # Üretimde environment variable kullanın
@@ -459,6 +461,28 @@ def home():
         display_name = user.profile.name if user.profile and user.profile.name else user.username
         return render_template("home.html", username=display_name, user_id=user_id)
     return render_template("home.html", username="Ziyaretçi", user_id=None)
+    
+    
+# --------------------------------------
+# Basit öneri motoru (cinsiyet + seviye + puan)
+# --------------------------------------
+def recommend_for_user(user, limit=6):
+    auto_gender = user.profile.gender or "unisex"
+    auto_level  = (user.profile.experience_level or "").lower()
+
+    q = (
+        db.session.query(Program, func.avg(UserProgramRating.rating).label("avg_r"))
+        .outerjoin(UserProgramRating, Program.id == UserProgramRating.program_id)
+        .filter(
+            (Program.gender == auto_gender) | (Program.gender == "unisex")
+        )
+        .group_by(Program.id)
+    )
+    if auto_level:
+        q = q.filter(func.lower(Program.level) == auto_level)
+
+    # sırala: yüksek puan önce, oy azsa yine de gelsin
+    return [p for p, _ in q.order_by(func.avg(UserProgramRating.rating).desc()).limit(limit)]    
 
 # --------------------------------------
 # SPOR PROGRAMLARI GÖSTERİMİ (SPORTS)
@@ -486,7 +510,11 @@ def sports():
             query = query.filter(func.lower(Program.level) == auto_level.lower())
     
     programs = query.order_by(Program.name).all()
-    recommended_programs = []  # Şimdilik öneri algoritmanız yoksa boş liste gönderiyoruz.
+            # Öneriler:
+        recommended_programs = recommend_for_user(user)  # eski boş liste yerine
+        return render_template("sports.html",
+                               programs=programs,
+                               recommended_programs=recommended_programs)
     
     return render_template("sports.html", programs=programs, recommended_programs=recommended_programs)
 
@@ -510,6 +538,23 @@ def choose_program(program_id):
     else:
         flash("Program bulunamadı!")
     return redirect(url_for("sports"))
+
+# --------------------------------------
+# Program için ortalama puan & toplam oy
+# --------------------------------------
+def program_stats(program_id):
+    avg_rating, num_ratings = (
+        db.session.query(
+            func.coalesce(func.avg(UserProgramRating.rating), 0),
+            func.count(UserProgramRating.id)
+        )
+        .filter(UserProgramRating.program_id == program_id)
+        .first()
+    )
+    return float(avg_rating), int(num_ratings)    
+    
+        #  <<<  BURAYA EKLE >>>
+    app.jinja_env.globals["program_stats"] = program_stats
     
     # --------------------------------------
 # PROGRAMI PUANLAMA (RATE PROGRAM)
