@@ -556,7 +556,7 @@ def program_stats(program_id):
 # Jinja'da global hâle getir – BLOK DIŞINDA!
 app.jinja_env.globals["program_stats"] = program_stats
 
-    # --------------------------------------
+# --------------------------------------
 # PROGRAMI PUANLAMA (RATE PROGRAM)
 # --------------------------------------
 @app.route("/rate_program/<int:program_id>", methods=["GET", "POST"])
@@ -569,18 +569,45 @@ def rate_program(program_id):
     program = Program.query.get_or_404(program_id)
 
     if request.method == "POST":
-        rating   = int(request.form.get("rating", 0))
-        feedback = request.form.get("feedback")
-        duration = request.form.get("duration")
-        progress = request.form.get("progress")
+        # --- 1. Form değerlerini al ---
+        rating_val   = request.form.get("rating", "0")
+        feedback_txt = request.form.get("feedback", "").strip()
+        duration_val = request.form.get("duration", "")
+        progress_val = request.form.get("progress", "")
 
+        # --- 2. Temel doğrulamalar ---
+        try:
+            rating = int(rating_val)
+            if rating not in range(1, 6):
+                raise ValueError
+        except ValueError:
+            flash("Puan 1‑5 arasında olmalı.")
+            return redirect(request.url)
+
+        try:
+            duration = int(duration_val) if duration_val else None
+            if duration is not None and not 1 <= duration <= 600:
+                raise ValueError
+        except ValueError:
+            flash("Kullanım süresi 1‑600 dakika arasında olmalı.")
+            return redirect(request.url)
+
+        try:
+            progress = float(progress_val) if progress_val else None
+            if progress is not None and not 0 <= progress <= 100:
+                raise ValueError
+        except ValueError:
+            flash("İlerleme %0‑100 arasında olmalı.")
+            return redirect(request.url)
+
+        # --- 3. Kaydet ---
         new_rating = UserProgramRating(
             user_id   = user_id,
             program_id= program_id,
             rating    = rating,
-            feedback  = feedback,
-            duration  = int(duration) if duration else None,
-            progress  = float(progress) if progress else None
+            feedback  = feedback_txt if feedback_txt else None,
+            duration  = duration,
+            progress  = progress
         )
         db.session.add(new_rating)
         db.session.commit()
@@ -588,7 +615,7 @@ def rate_program(program_id):
         flash("Puanınız kaydedildi, teşekkürler!")
         return redirect(url_for("sports"))
 
-    # GET isteği ise formu göster
+    # GET isteği: formu göster
     return render_template("rate_program.html", program=program)
 
 
