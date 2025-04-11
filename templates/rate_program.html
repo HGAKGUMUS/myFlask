@@ -6,10 +6,12 @@
   <div class="col-md-8">
     <div class="card shadow-sm">
       <div class="card-body">
-        <h2 class="card-title">{{ program.name }} Programını Puanla</h2>
+        <!-- Program adını vurgulamak için soru-metni sınıfı ekledik -->
+        <h2 class="card-title soru-metni">{{ program.name }} Programını Puanla</h2>
         <form method="POST">
           <div class="mb-3">
-            <label for="rating" class="form-label">Puan (1-5)</label>
+            <!-- Label vurgulanması için soru-metni -->
+            <label for="rating" class="form-label soru-metni">Puan (1-5)</label>
             <select class="form-select" name="rating">
               <option value="1">1 - Çok Kötü</option>
               <option value="2">2 - Kötü</option>
@@ -18,24 +20,17 @@
               <option value="5">5 - Çok İyi</option>
             </select>
           </div>
-		{#  Yorum alanı şimdilik kapatıldı
+          {# Yorum alanı şimdilik kapatıldı #}
           <div class="mb-3">
-            <label for="feedback" class="form-label">Yorum</label>
-            <textarea class="form-control" name="feedback" rows="3"></textarea>
-          </div>
-		#}
-          <div class="mb-3">
-            <label for="duration" class="form-label">Kullanım Süresi (dakika)</label>
+            <label for="duration" class="form-label soru-metni">Kullanım Süresi (dakika)</label>
             <input type="number" class="form-control" name="duration" value="0" min="1" max="600">
-            <small class="text-muted">Programı ne kadar süreyle kullandınız?</small>
+            <small class="text-muted soru-metni">Programı ne kadar süreyle kullandınız?</small>
           </div>
-
           <div class="mb-3">
-            <label for="progress" class="form-label">İlerleme (%)</label>
-            <input type="number" step="0.1" class="form-control"name="progress" value="0" min="0" max="100">
-            <small class="text-muted">Programda ne kadar ilerlediniz?</small>
+            <label for="progress" class="form-label soru-metni">İlerleme (%)</label>
+            <input type="number" step="0.1" class="form-control" name="progress" value="0" min="0" max="100">
+            <small class="text-muted soru-metni">Programda ne kadar ilerlediniz?</small>
           </div>
-
           <button type="submit" class="btn btn-primary w-100">Gönder</button>
         </form>
       </div>
