@@ -115,21 +115,27 @@
             <input type="checkbox" name="chronic_conditions_options" value="Böbrek Hastalıkları"> Böbrek Hastalıkları<br>
             <input type="checkbox" name="chronic_conditions_options" value="Karaciğer Hastalıkları"> Karaciğer Hastalıkları<br>
             <input type="checkbox" name="chronic_conditions_options" value="Eklem Ağrıları"> Eklem Ağrıları
+			<input type="checkbox" name="chronic_conditions_options" value="Çölyak"> Çölyak
           </div>
           
           <!-- Ameliyat Geçmişi (Dropdown) -->
           <div class="mb-3">
-            <label class="form-label">Ameliyat Geçmişi:</label><br>
-            <select class="form-select" name="surgery_history">
-              <option value="">Seçiniz</option>
-              <option value="Yok">Yok</option>
-              <option value="Kalp Ameliyatı">Kalp Ameliyatı</option>
-              <option value="Eklem Protezi">Eklem Protezi</option>
-              <option value="Karın Ameliyatı">Karın Ameliyatı</option>
-              <option value="Beyin Ameliyatı">Beyin Ameliyatı</option>
-              <option value="Diğer">Diğer</option>
-            </select>
-          </div>
+			  <label class="form-label">Ameliyat Geçmişi:</label><br>
+			  <select class="form-select" name="surgery_history">
+				<option value="">Seçiniz</option>
+				<option value="Yok">Yok</option>
+				<option value="Kalp Ameliyatı">Kalp Ameliyatı</option>
+				<option value="Beyin Ameliyatı">Beyin Ameliyatı</option>
+				<option value="Karın Ameliyatı">Karın Ameliyatı</option>
+				<option value="Ortopedik Ameliyatlar">Ortopedik Ameliyatlar</option>
+				<option value="Organ Nakli">Organ Nakli</option>
+				<option value="Göz Ameliyatı">Göz Ameliyatı</option>
+				<option value="Diş Ameliyatı">Diş Ameliyatı</option>
+				<option value="Mide Ameliyatı">Mide Ameliyatı</option>
+				<option value="Bağırsak Ameliyatı">Bağırsak Ameliyatı</option>
+				<option value="Diğer">Diğer</option>
+			  </select>
+		  </div>
           
           <!-- İlaç Kullanımı -->
           <div class="mb-3">
@@ -138,25 +144,30 @@
             <input type="radio" name="drug_usage" value="hayır" required> Hayır
           </div>
           <div class="mb-3" id="drug_usage_options" style="display:none;">
-            <label class="form-label">Kullandığınız İlaçlar:</label><br>
-            <input type="checkbox" name="drug_options" value="Ağrı Kesiciler"> Ağrı Kesiciler<br>
-            <input type="checkbox" name="drug_options" value="Anti-inflamatuar"> Anti-inflamatuar<br>
-            <input type="checkbox" name="drug_options" value="Antihipertansifler"> Antihipertansifler<br>
-            <input type="checkbox" name="drug_options" value="Antidepresanlar"> Antidepresanlar<br>
-            <input type="checkbox" name="drug_options" value="Antibiyotikler"> Antibiyotikler<br>
-            <input type="checkbox" name="drug_options" value="Diyabet İlaçları"> Diyabet İlaçları<br>
-            <input type="checkbox" name="drug_options" value="Kortikosteroidler"> Kortikosteroidler<br>
-            <input type="checkbox" name="drug_options" value="Anksiyolitikler"> Anksiyolitikler<br>
-            <input type="checkbox" name="drug_options" value="Uyku İlaçları"> Uyku İlaçları<br>
-            <input type="checkbox" name="drug_options" value="Kemoterapi"> Kemoterapi<br>
-            <input type="checkbox" name="drug_options" value="Diğer"> Diğer
-          </div>
+			  <label class="form-label">Kullandığınız İlaçlar:</label><br>
+			  <input type="checkbox" name="drug_options" value="Ağrı Kesiciler"> Ağrı Kesiciler<br>
+			  <input type="checkbox" name="drug_options" value="Anti-inflamatuar"> Anti-inflamatuar<br>
+			  <input type="checkbox" name="drug_options" value="Antihipertansifler"> Antihipertansifler<br>
+			  <input type="checkbox" name="drug_options" value="Beta Blokerler"> Beta Blokerler<br>
+			  <input type="checkbox" name="drug_options" value="Statinler"> Statinler<br>
+			  <input type="checkbox" name="drug_options" value="ACE İnhibitörleri"> ACE İnhibitörleri<br>
+			  <input type="checkbox" name="drug_options" value="ARB'ler"> ARB'ler<br>
+			  <input type="checkbox" name="drug_options" value="Diyabet İlaçları"> Diyabet İlaçları<br>
+			  <input type="checkbox" name="drug_options" value="Kortikosteroidler"> Kortikosteroidler<br>
+			  <input type="checkbox" name="drug_options" value="Anksiyolitikler"> Anksiyolitikler<br>
+			  <input type="checkbox" name="drug_options" value="Uyku İlaçları"> Uyku İlaçları<br>
+			  <input type="checkbox" name="drug_options" value="Kemoterapi"> Kemoterapi<br>
+			  <input type="checkbox" name="drug_options" value="Diüretikler"> Diüretikler<br>
+			  <input type="checkbox" name="drug_options" value="Antidepresanlar"> Antidepresanlar<br>
+			  <input type="checkbox" name="drug_options" value="Diğer"> Diğer
+		   </div>
           
           <!-- Supplement Kullanımı (15 seçenekli) -->
           <div class="mb-3">
             <label class="form-label">Supplement Kullanımı:</label><br>
             <input type="checkbox" name="supplement_options" value="Protein Tozu"> Protein Tozu<br>
             <input type="checkbox" name="supplement_options" value="Kreatin"> Kreatin<br>
+			<input type="checkbox" name="supplement_options" value="Karbonhidrat"> Karbonhidrat
             <input type="checkbox" name="supplement_options" value="Vitamin D"> Vitamin D<br>
             <input type="checkbox" name="supplement_options" value="Omega-3 Balık Yağı"> Omega-3 Balık Yağı<br>
             <input type="checkbox" name="supplement_options" value="Multivitamin"> Multivitamin<br>
