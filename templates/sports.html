@@ -4,19 +4,24 @@
 {% block content %}
 
 <div class="d-flex justify-content-between align-items-center mb-4">
+<<<<<<< HEAD
+  <h2 class="soru-metni mb-0">Spor Programları</h2>
+=======
   <h2 class="mb-0">Spor Programları</h2>
+>>>>>>> 5735937 (Yeni güncellemeler: tasarım, metin, buton temizliği)
 </div>
 
 {# ---------------- ÖNERİLENLER ---------------- #}
 {% if recommended_programs %}
-	{# ÖNERİLENLER başlığı #}
-  <h2 class="text-primary">Size Özel Öneriler</h2>
+  <h2 class="soru-metni text-primary">Size Özel Öneriler</h2>
   <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
     {% for program in recommended_programs %}
       <div class="col">
         <div class="card h-100 shadow-sm">
           <div class="card-body">
-            <h5 class="card-title">{{ program.name }} <span class="badge bg-info">Önerilen</span></h5>
+            <h5 class="card-title">
+              {{ program.name }} <span class="badge bg-info">Önerilen</span>
+            </h5>
 
             {# ⭐ / oy satırı #}
             {% set avg, cnt = program_stats(program.id) %}
@@ -34,8 +39,13 @@
               <strong>Dinlenme:</strong> {{ program.rest_intervals }}
             </p>
             <p class="small text-muted">
+<<<<<<< HEAD
+              {{ program.exercise_steps or "Bilgi yok." }}
+            </p>
+=======
 			  {{ program.exercise_steps or "Bilgi yok." }}
 			</p>
+>>>>>>> 5735937 (Yeni güncellemeler: tasarım, metin, buton temizliği)
           </div>
           <div class="card-footer bg-white border-0">
             <a href="{{ url_for('choose_program', program_id=program.id) }}" class="btn btn-primary w-100">Programı Seç</a>
@@ -50,8 +60,7 @@
 {% endif %}
 
 {# ---------------- TÜM PROGRAMLAR ---------------- #}
-{# TÜM PROGRAMLAR başlığı #}
-<h2 class="mt-5 text-success">Tüm Programlar</h2>
+<h2 class="soru-metni mt-5 text-success">Tüm Programlar</h2>
 <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
   {% for program in programs %}
     <div class="col">
@@ -59,7 +68,6 @@
         <div class="card-body">
           <h5 class="card-title">{{ program.name }}</h5>
 
-          {# ⭐ / oy satırı #}
           {% set avg, cnt = program_stats(program.id) %}
           <p class="mb-1">
             ⭐ {{ "%.1f"|format(avg) }} / 5
@@ -75,9 +83,14 @@
             <strong>Dinlenme:</strong> {{ program.rest_intervals }}
           </p>
           <p class="small text-muted">
+<<<<<<< HEAD
+            {{ program.exercise_steps or "Bilgi yok." }}
+          </p>
+=======
             <p class="small text-muted">
 			  {{ program.exercise_steps or "Bilgi yok." }}
 			</p>
+>>>>>>> 5735937 (Yeni güncellemeler: tasarım, metin, buton temizliği)
         </div>
         <div class="card-footer bg-white border-0">
           <a href="{{ url_for('choose_program', program_id=program.id) }}" class="btn btn-primary w-100">Programı Seç</a>
@@ -97,14 +110,15 @@
           <h5 class="modal-title">{{ modal_cfg.title }}</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
-        <div class="modal-body">{{ modal_cfg.body }}</div>
+        <div class="modal-body">
+          {{ modal_cfg.body }}
+        </div>
         <div class="modal-footer">
           <a href="{{ modal_cfg.btn_url }}" class="btn btn-primary w-100">{{ modal_cfg.btn_txt }}</a>
         </div>
       </div>
     </div>
   </div>
-
   <script>
     new bootstrap.Modal(document.getElementById('nextStepModal')).show();
   </script>
