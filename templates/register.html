@@ -265,5 +265,36 @@
       }
     });
   });
+
+  // Form gönderilmeden önce checkbox gruplarının zorunluluk kontrolü
+  document.querySelector('form').addEventListener('submit', function(e) {
+    // Kronik Hastalıklar kontrolü
+    var chronic = document.getElementsByName('chronic_conditions_options');
+    var chronicChecked = Array.from(chronic).some(cb => cb.checked);
+    if (!chronicChecked) {
+      e.preventDefault();
+      alert('Lütfen kronik hastalık seçeneklerinden en az birini seçiniz.');
+      return;
+    }
+    // Supplement Kullanımı kontrolü
+    var supplement = document.getElementsByName('supplement_options');
+    var supplementChecked = Array.from(supplement).some(cb => cb.checked);
+    if (!supplementChecked) {
+      e.preventDefault();
+      alert('Lütfen supplement seçeneklerinden en az birini seçiniz.');
+      return;
+    }
+    // Eğer "Düzenli İlaç Kullanımı" evet seçili ise ilaç seçenekleri kontrolü
+    var drugUsage = document.querySelector('input[name="drug_usage"]:checked');
+    if (drugUsage && drugUsage.value === 'evet') {
+      var drugOptions = document.getElementsByName('drug_options');
+      var drugChecked = Array.from(drugOptions).some(cb => cb.checked);
+      if (!drugChecked) {
+        e.preventDefault();
+        alert('Lütfen kullandığınız ilaç seçeneklerinden en az birini seçiniz.');
+        return;
+      }
+    }
+  });
 </script>
 {% endblock %}
