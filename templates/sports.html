@@ -4,11 +4,7 @@
 {% block content %}
 
 <div class="d-flex justify-content-between align-items-center mb-4">
-<<<<<<< HEAD
   <h2 class="soru-metni mb-0">Spor Programları</h2>
-=======
-  <h2 class="mb-0">Spor Programları</h2>
->>>>>>> 5735937 (Yeni güncellemeler: tasarım, metin, buton temizliği)
 </div>
 
 {# ---------------- ÖNERİLENLER ---------------- #}
@@ -22,30 +18,19 @@
             <h5 class="card-title">
               {{ program.name }} <span class="badge bg-info">Önerilen</span>
             </h5>
-
-            {# ⭐ / oy satırı #}
             {% set avg, cnt = program_stats(program.id) %}
             <p class="mb-1">
-              ⭐ {{ "%.1f"|format(avg) }} / 5
-              <span class="text-muted">({{ cnt }} oy)</span>
+              ⭐ {{ "%.1f"|format(avg) }} / 5 <span class="text-muted">({{ cnt }} oy)</span>
             </p>
-
             <p class="card-text">
-              <strong>Seviye:</strong> {{ program.level }} <br>
-              <strong>Süre:</strong> {{ program.duration }} dk <br>
-              <strong>Cinsiyet:</strong> {{ program.gender }} <br>
-              <strong>Zorluk:</strong> {{ program.difficulty }} <br>
-              <strong>Tür:</strong> {{ program.type }} <br>
+              <strong>Seviye:</strong> {{ program.level }}<br>
+              <strong>Süre:</strong> {{ program.duration }} dk<br>
+              <strong>Cinsiyet:</strong> {{ program.gender }}<br>
+              <strong>Zorluk:</strong> {{ program.difficulty }}<br>
+              <strong>Tür:</strong> {{ program.type }}<br>
               <strong>Dinlenme:</strong> {{ program.rest_intervals }}
             </p>
-            <p class="small text-muted">
-<<<<<<< HEAD
-              {{ program.exercise_steps or "Bilgi yok." }}
-            </p>
-=======
-			  {{ program.exercise_steps or "Bilgi yok." }}
-			</p>
->>>>>>> 5735937 (Yeni güncellemeler: tasarım, metin, buton temizliği)
+            <p class="small text-muted">{{ program.exercise_steps or "Bilgi yok." }}</p>
           </div>
           <div class="card-footer bg-white border-0">
             <a href="{{ url_for('choose_program', program_id=program.id) }}" class="btn btn-primary w-100">Programı Seç</a>
@@ -67,30 +52,19 @@
       <div class="card h-100 shadow-sm">
         <div class="card-body">
           <h5 class="card-title">{{ program.name }}</h5>
-
           {% set avg, cnt = program_stats(program.id) %}
           <p class="mb-1">
-            ⭐ {{ "%.1f"|format(avg) }} / 5
-            <span class="text-muted">({{ cnt }} oy)</span>
+            ⭐ {{ "%.1f"|format(avg) }} / 5 <span class="text-muted">({{ cnt }} oy)</span>
           </p>
-
           <p class="card-text">
-            <strong>Seviye:</strong> {{ program.level }} <br>
-            <strong>Süre:</strong> {{ program.duration }} dk <br>
-            <strong>Cinsiyet:</strong> {{ program.gender }} <br>
-            <strong>Zorluk:</strong> {{ program.difficulty }} <br>
-            <strong>Tür:</strong> {{ program.type }} <br>
+            <strong>Seviye:</strong> {{ program.level }}<br>
+            <strong>Süre:</strong> {{ program.duration }} dk<br>
+            <strong>Cinsiyet:</strong> {{ program.gender }}<br>
+            <strong>Zorluk:</strong> {{ program.difficulty }}<br>
+            <strong>Tür:</strong> {{ program.type }}<br>
             <strong>Dinlenme:</strong> {{ program.rest_intervals }}
           </p>
-          <p class="small text-muted">
-<<<<<<< HEAD
-            {{ program.exercise_steps or "Bilgi yok." }}
-          </p>
-=======
-            <p class="small text-muted">
-			  {{ program.exercise_steps or "Bilgi yok." }}
-			</p>
->>>>>>> 5735937 (Yeni güncellemeler: tasarım, metin, buton temizliği)
+          <p class="small text-muted">{{ program.exercise_steps or "Bilgi yok." }}</p>
         </div>
         <div class="card-footer bg-white border-0">
           <a href="{{ url_for('choose_program', program_id=program.id) }}" class="btn btn-primary w-100">Programı Seç</a>
