@@ -1,41 +1,64 @@
 {% extends "base.html" %}
-{% block title %}Profil{% endblock %}
+{% block title %}Profilim{% endblock %}
+
 {% block content %}
+<div class="container mt-5">
+  <h2 class="mb-4 text-center">Profil Bilgileriniz</h2>
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <dl class="row">
+        <dt class="col-sm-4">Adı</dt>
+        <dd class="col-sm-8">{{ profile.name }}</dd>
 
-<h2 class="mb-4">Profil Bilgilerim</h2>
+        <dt class="col-sm-4">Kullanıcı Adı</dt>
+        <dd class="col-sm-8">{{ user.username }}</dd>
 
-<div class="row">
-  <div class="col-md-6">
-    <div class="card shadow-sm mb-3">
-      <div class="card-body">
-        <h5 class="card-title">
-          Merhaba, {{ profile.name if profile.name else user.username }}!
-        </h5>
-        <p class="card-text">
-          <strong>Yaş:</strong> {{ profile.age }} <br>
-          <strong>Burç:</strong> {{ profile.zodiac }} <br>
-          <strong>Cinsiyet:</strong> {{ profile.gender }} <br>
-          <strong>Deneyim Seviyesi:</strong> {{ profile.experience_level }} <br>
-          <strong>Boy:</strong> {{ profile.height }} cm<br>
-          <strong>Kilo:</strong> {{ profile.weight }} kg<br>
-          <strong>Hedefler:</strong> {{ profile.goals }}<br>
-        </p>
-      </div>
-    </div>
-  </div>
+        <dt class="col-sm-4">Email</dt>
+        <dd class="col-sm-8">{{ user.email }}</dd>
 
-  <div class="col-md-6">
-    <div class="card shadow-sm">
-      <div class="card-body">
-        <h5 class="card-title">Kullanıcı Bilgileri</h5>
-        <p class="card-text">
-          <strong>Email:</strong> {{ user.email }}<br>
-          <strong>Kullanıcı Adı:</strong> {{ user.username }}<br>
-          <strong>Oluşturulma Tarihi:</strong> {{ user.created_at }}<br>
-        </p>
-      </div>
+        <dt class="col-sm-4">Cinsiyet</dt>
+        <dd class="col-sm-8">{{ profile.gender }}</dd>
+
+        <dt class="col-sm-4">Yaş</dt>
+        <dd class="col-sm-8">{{ profile.age }}</dd>
+
+        <dt class="col-sm-4">Boy (cm)</dt>
+        <dd class="col-sm-8">{{ profile.height }}</dd>
+
+        <dt class="col-sm-4">Kilo (kg)</dt>
+        <dd class="col-sm-8">{{ profile.weight }}</dd>
+
+        <dt class="col-sm-4">Burç</dt>
+        <dd class="col-sm-8">{{ profile.zodiac }}</dd>
+
+        <dt class="col-sm-4">Deneyim Seviyesi</dt>
+        <dd class="col-sm-8">{{ profile.experience_level }}</dd>
+
+        <dt class="col-sm-4">Hedef</dt>
+        <dd class="col-sm-8">{{ profile.goals }}</dd>
+
+        <dt class="col-sm-4">Şehir</dt>
+        <dd class="col-sm-8">{{ profile.city.city_name if profile.city }}</dd>
+
+        <dt class="col-sm-4">İlçe</dt>
+        <dd class="col-sm-8">{{ profile.district.district_name if profile.district }}</dd>
+
+        <dt class="col-sm-4">Kronik Hastalıklar</dt>
+        <dd class="col-sm-8">{{ profile.chronic_conditions or "Yok" }}</dd>
+
+        <dt class="col-sm-4">Ameliyat Geçmişi</dt>
+        <dd class="col-sm-8">{{ profile.surgery_history or "Yok" }}</dd>
+
+        <dt class="col-sm-4">İlaç Kullanımı</dt>
+        <dd class="col-sm-8">{{ profile.medications or "Yok" }}</dd>
+
+        <dt class="col-sm-4">Supplement Kullanımı</dt>
+        <dd class="col-sm-8">{{ profile.supplement_usage or "Yok" }}</dd>
+
+        <dt class="col-sm-4">Günlük Su Miktarı</dt>
+        <dd class="col-sm-8">{{ profile.daily_water_intake or "Belirtilmedi" }}</dd>
+      </dl>
     </div>
   </div>
 </div>
-
 {% endblock %}
