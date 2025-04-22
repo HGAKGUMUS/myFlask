@@ -5,12 +5,14 @@ from flask import Flask, render_template, request, redirect, url_for, flash, ses
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from sqlalchemy import text, or_, func
+from sqlalchemy.exc import IntegrityError   # <‑‑ bunu ekleyin
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
 from xgboost import XGBRegressor
 from lightgbm import LGBMRegressor
 from catboost import CatBoostRegressor
+
 
 
 app = Flask(__name__)
@@ -142,7 +144,9 @@ class UserProgram(db.Model):
 # Şifre Validasyonu
 # --------------------------------------
 def validate_password(pw):
-    if len(pw) != 8:
+    # En az 8 karakter, en az 1 BÜYÜK harf, 1 küçük harf, 1 rakam
+-   if len(pw) != 8:
++   if len(pw) < 8:
         return False
     if not re.search(r'[A-Z]', pw):
         return False
@@ -151,6 +155,7 @@ def validate_password(pw):
     if not re.search(r'\d', pw):
         return False
     return True
+
 
 # --------------------------------------
 # Tabloları Oluşturma ve Örnek Veriler Ekleme
@@ -323,69 +328,95 @@ def get_districts(city_id):
 @app.route("/register", methods=["GET", "POST"])
 def register():
     if request.method == "POST":
-        username = request.form.get("username")
-        email = request.form.get("email")
-        password = request.form.get("password")
-        name = request.form.get("name")
-        zodiac = request.form.get("zodiac")
-        age_str = request.form.get("age")
-        city_id = request.form.get("city")
-        district_id = request.form.get("district")
-        
-        # Mevcut alanlar:
-        gender = request.form.get("gender")
-        height_str = request.form.get("height")
-        weight_str = request.form.get("weight")
-        experience_level = request.form.get("experience_level")
-        goals = request.form.get("goals")
-        
-        # Yeni eklenen alanlar:
-        # "Kronik Hastalıklar" checkbox alanından gelen verileri alıyoruz.
+        # ---------- Form verileri ----------
+        username        = request.form.get("username")
+        email           = request.form.get("email")
+        password        = request.form.get("password")
+        name            = request.form.get("name")
+        zodiac          = request.form.get("zodiac")
+        age_str         = request.form.get("age")
+        city_id         = request.form.get("city")
+        district_id     = request.form.get("district")
+
+        gender          = request.form.get("gender")
+        height_str      = request.form.get("height")
+        weight_str      = request.form.get("weight")
+        experience_level= request.form.get("experience_level")
+        goals           = request.form.get("goals")
+
         chronic_conditions = get_checkbox_values("chronic_conditions_options")
-        # "Ameliyat Geçmişi" dropdown seçim değeri:
-        surgery_history = request.form.get("surgery_history")
-        # İlaç kullanımı için radyo buton değeri:
-        drug_usage = request.form.get("drug_usage")  # "evet" veya "hayır"
-        # Eğer "evet" ise ilaç seçimi checkboxlarından gelen verileri alıyoruz.
-        medications = get_checkbox_values("drug_options") if drug_usage == "evet" else None
-        # Supplement kullanımı checkboxlarından gelen verileri alıyoruz.
-        supplement_usage = get_checkbox_values("supplement_options")
-        # Günlük su miktarı dropdown değeri:
+        surgery_history    = request.form.get("surgery_history")
+        drug_usage         = request.form.get("drug_usage")          # "evet" / "hayır"
+        medications        = get_checkbox_values("drug_options") if drug_usage == "evet" else None
+        supplement_usage   = get_checkbox_values("supplement_options")
         daily_water_intake = request.form.get("daily_water_intake")
-        
-        # activity_level ve nutrition HTML formunda alan yoksa None kalır.
+
         activity_level = request.form.get("activity_level")
-        nutrition = request.form.get("nutrition")
-        
-        existing = User.query.filter_by(username=username).first()
-        if existing:
+        nutrition      = request.form.get("nutrition")
+
+        # ---------- Basit doğrulamalar ----------
+        if User.query.filter_by(username=username).first():
             flash("Bu kullanıcı adı zaten mevcut!")
             return render_template("register.html", cities=City.query.all())
-        
+
         if not validate_password(password):
             flash("Şifre 8 karakter olmalı ve en az 1 büyük harf, 1 küçük harf, 1 rakam içermelidir.")
             return render_template("register.html", cities=City.query.all())
-        
-        hashed_pw = generate_password_hash(password)
-        try:
-            age_val = int(age_str) if age_str else None
-        except:
-            age_val = None
-        try:
-            height_val = float(height_str) if height_str else None
-        except:
+
+        # ---------- Sayısal doğrulamalar ----------
+        errors = []
+
+        # Yaş
+        if age_str:
+            try:
+                age_val = int(age_str)
+                if age_val <= 0:
+                    errors.append("Yaş pozitif bir sayı olmalıdır.")
+            except ValueError:
+                errors.append("Yaş sayı olmalıdır.")
+        else:
+            age_val = None   # yaş alanını zorunlu tutmuyorsan
+
+        # Boy
+        if height_str:
+            try:
+                height_val = float(height_str)
+                if height_val <= 0:
+                    errors.append("Boy pozitif olmalıdır.")
+            except ValueError:
+                errors.append("Boy sayı olmalıdır.")
+        else:
             height_val = None
-        try:
-            weight_val = float(weight_str) if weight_str else None
-        except:
+
+        # Kilo
+        if weight_str:
+            try:
+                weight_val = float(weight_str)
+                if weight_val <= 0:
+                    errors.append("Kilo pozitif olmalıdır.")
+            except ValueError:
+                errors.append("Kilo sayı olmalıdır.")
+        else:
             weight_val = None
-        
-        new_user = User(username=username, email=email, password=hashed_pw)
-        db.session.add(new_user)
-        db.session.commit()
-        
+
+        # Hata varsa formu geri döndür
+        if errors:
+            for msg in errors:
+                flash(msg)
+            return render_template("register.html", cities=City.query.all())
+
+
+        # ---------- Nesneleri oluştur ----------
+        hashed_pw = generate_password_hash(password)
+
+        new_user = User(
+            username=username,
+            email=email,
+            password=hashed_pw
+        )
+
         new_profile = UserProfile(
-            user_id=new_user.id,
+            user=new_user,                 # ilişkiyi böyle kurmak daha temiz
             name=name,
             zodiac=zodiac,
             age=age_val,
@@ -404,12 +435,23 @@ def register():
             activity_level=activity_level,
             nutrition=nutrition
         )
-        db.session.add(new_profile)
-        db.session.commit()
-        
-        flash("Kayıt başarılı! Lütfen giriş yapın.")
-        return redirect(url_for("login"))
-    
+
+        # ---------- Tek transaction ----------
+        try:
+            db.session.add_all([new_user, new_profile])
+            db.session.commit()
+        except IntegrityError:
+            db.session.rollback()
+            flash("Bu kullanıcı adı veya e‑posta zaten kayıtlı!")
+            return render_template("register.html", cities=City.query.all())
+
+        # ---------- Oturumu aç & yönlendir ----------
+        session["user_id"]  = new_user.id
+        session["username"] = new_user.username
+        flash("Kayıt başarılı, hoş geldiniz!")
+        return redirect(url_for("sports"))
+
+    # ------------- GET: formu göster -------------
     cities = City.query.all()
     return render_template("register.html", cities=cities)
 
@@ -535,16 +577,20 @@ def choose_program(program_id):
     if not user_id:
         flash("Önce giriş yapmanız gerekir!")
         return redirect(url_for("login"))
-    
+
     program = Program.query.get(program_id)
     if program:
-        new_user_program = UserProgram(user_id=user_id, program_id=program_id)
-        db.session.add(new_user_program)
-        db.session.commit()
-        flash(f"{program.name} programı seçildi ve kaydedildi!")
+        # Aynı programı tekrar seçmesin
+        existing = UserProgram.query.filter_by(user_id=user_id, program_id=program_id).first()
+        if not existing:
+            new_user_program = UserProgram(user_id=user_id, program_id=program_id)
+            db.session.add(new_user_program)
+            db.session.commit()
+        # ⚠️ Direkt puan verme ekranına yönlendir
+        return redirect(url_for("rate_program", program_id=program_id))
     else:
         flash("Program bulunamadı!")
-    return redirect(url_for("sports"))
+        return redirect(url_for("sports"))
 
 # --------------------------------------
 # Program için ortalama puan & toplam oy
