@@ -144,9 +144,8 @@ class UserProgram(db.Model):
 # Şifre Validasyonu
 # --------------------------------------
 def validate_password(pw):
-    # En az 8 karakter, en az 1 BÜYÜK harf, 1 küçük harf, 1 rakam
--   if len(pw) != 8:
-+   if len(pw) < 8:
+    # En az 8 karakter, en az 1 BÜYÜK harf, 1 küçük harf, 1 rakam
+    if len(pw) < 8:
         return False
     if not re.search(r'[A-Z]', pw):
         return False
@@ -155,7 +154,6 @@ def validate_password(pw):
     if not re.search(r'\d', pw):
         return False
     return True
-
 
 # --------------------------------------
 # Tabloları Oluşturma ve Örnek Veriler Ekleme
