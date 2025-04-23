@@ -12,6 +12,38 @@ from sklearn.preprocessing import LabelEncoder
 from xgboost import XGBRegressor
 from lightgbm import LGBMRegressor
 from catboost import CatBoostRegressor
+# app.py'nin en üst kısmına (import’ların hemen altına) ekli olmalı
+import joblib
+
+
+# ---------------------------------
+# Pipeline'ı yükle
+# ---------------------------------
+PIPELINE_PATH = os.path.join(os.path.dirname(__file__), "models", "fit_pipeline.pkl")
+pipeline = joblib.load(PIPELINE_PATH) if os.path.exists(PIPELINE_PATH) else None
+
+# ---------------------------------
+# Tahmin yardımcı fonksiyonu
+# ---------------------------------
+def predict_score(user, program):
+    """ML pipeline yüklüyse özellik satırını tahmine çevirir,
+    yoksa 0 döner (fallback)."""
+    if pipeline is None:
+        return 0
+
+    feats = {
+        "age": user.profile.age,
+        "height": float(user.profile.height),
+        "weight": float(user.profile.weight),
+        "duration": program.duration,
+        "gender": user.profile.gender,
+        "experience_level": user.profile.experience_level,
+        "program_level": program.level,
+        "type": program.type
+    }
+    return pipeline.predict(pd.DataFrame([feats]))[0]
+
+
 
 
 
@@ -503,25 +535,32 @@ def home():
     
     
 # --------------------------------------
-# Basit öneri motoru (cinsiyet + seviye + puan)
+# Öneri motoru: <50 puan → eski mantık, aksi hâlde ML sıralama
 # --------------------------------------
 def recommend_for_user(user, limit=6):
-    auto_gender = user.profile.gender or "unisex"
-    auto_level  = (user.profile.experience_level or "").lower()
+    """Veri azsa basit, yeterliyse ML tabanlı öneri döndürür."""
+    # ----- FALLBACK KOŞULU -----
+    if UserProgramRating.query.count() < 50 or pipeline is None:
+        auto_gender = user.profile.gender or "unisex"
+        auto_level  = (user.profile.experience_level or "").lower()
 
-    q = (
-        db.session.query(Program, func.avg(UserProgramRating.rating).label("avg_r"))
-        .outerjoin(UserProgramRating, Program.id == UserProgramRating.program_id)
-        .filter(
-            (Program.gender == auto_gender) | (Program.gender == "unisex")
+        q = (
+            db.session.query(Program, func.avg(UserProgramRating.rating).label("avg_r"))
+            .outerjoin(UserProgramRating, Program.id == UserProgramRating.program_id)
+            .filter((Program.gender == auto_gender) | (Program.gender == "unisex"))
+            .group_by(Program.id)
         )
-        .group_by(Program.id)
-    )
-    if auto_level:
-        q = q.filter(func.lower(Program.level) == auto_level)
+        if auto_level:
+            q = q.filter(func.lower(Program.level) == auto_level)
 
-    # sırala: yüksek puan önce, oy azsa yine de gelsin
-    return [p for p, _ in q.order_by(func.avg(UserProgramRating.rating).desc()).limit(limit)]    
+        return [p for p, _ in q.order_by(func.avg(UserProgramRating.rating).desc()).limit(limit)]
+
+    # ----- ML SIRALAMA -----
+    candidates = Program.query.all()
+    scored = [(p, predict_score(user, p)) for p in candidates]
+    scored.sort(key=lambda x: x[1], reverse=True)
+    return [p for p, _ in scored[:limit]]
+
 
 # --------------------------------------
 # SPOR PROGRAMLARI GÖSTERİMİ (SPORTS)

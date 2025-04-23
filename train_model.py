@@ -1,76 +1,67 @@
-import pandas as pd
+# train_model.py  –  güncel tam sürüm
+import os, joblib, pandas as pd
 from sqlalchemy import create_engine
-from app import app, db, UserProgramRating, UserProfile, Program
-from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import LabelEncoder, StandardScaler
-import xgboost as xgb
-import joblib
-from sklearn.metrics import mean_squared_error
+from app import app, db
+from sklearn.model_selection import cross_val_score
+from sklearn.pipeline import Pipeline
+from sklearn.compose import ColumnTransformer
+from sklearn.preprocessing import StandardScaler, OneHotEncoder
+from xgboost import XGBRegressor
 
 with app.app_context():
-    # Veritabanı bağlantısını SQLAlchemy engine üzerinden kuruyoruz
+    # 1) Veriyi çek
     engine = create_engine(db.engine.url)
+    df = pd.read_sql("""
+        SELECT upr.rating,
+               up.age, up.gender, up.experience_level,
+               up.height, up.weight,
+               p.level  AS program_level,
+               p.difficulty, p.type, p.duration
+        FROM user_program_ratings upr
+        JOIN user_profiles up ON upr.user_id = up.user_id
+        JOIN programs       p ON upr.program_id = p.id
+    """, engine)
 
-    # SQL sorgusu ile verilerinizi çekelim (kullanıcı, profil ve program bilgilerini birleştiriyoruz)
-    query = """
-    SELECT 
-        upr.rating,
-        up.age,
-        up.gender,
-        up.experience_level,
-        up.height,
-        up.weight,
-        p.level as program_level,
-        p.difficulty,
-        p.type,
-        p.duration
-    FROM user_program_ratings upr
-    JOIN user_profiles up ON upr.user_id = up.user_id
-    JOIN programs p ON upr.program_id = p.id;
-    """
-
-   # Verileri pandas DataFrame'e aktarın
-    df = pd.read_sql(query, engine)
     print("Veri seti boyutu:", df.shape)
 
-    # Veri sayısını kontrol et: eğer veri 10 satırdan az ise eğitimi iptal et
+    # 2) Veri yetersizse çık
     if df.shape[0] < 10:
-        print("Uyarı: Yeterli veri bulunamadı, model eğitimi yapılmayacak.")
+        print("⚠️ 10’dan az kayıt var → model eğitimi atlandı.")
         exit()
 
-    # Kategorik sütunları sayısal değerlere çeviriyoruz
-    categorical_cols = ["gender", "experience_level", "program_level", "type"]
-    for col in categorical_cols:
-        le = LabelEncoder()
-        df[col] = le.fit_transform(df[col].astype(str))
+    # 3) Pipeline
+    num_cols = ["age", "height", "weight", "duration"]
+    cat_cols = ["gender", "experience_level", "program_level", "type"]
 
-    # Sayısal verileri ölçeklendiriyoruz
-    scaler = StandardScaler()
-    numerical_cols = ["age", "height", "weight", "duration"]
-    df[numerical_cols] = scaler.fit_transform(df[numerical_cols])
+    preproc = ColumnTransformer([
+        ("num", StandardScaler(),                 num_cols),
+        ("cat", OneHotEncoder(handle_unknown="ignore"), cat_cols)
+    ])
 
-    # Özellikler (X) ve etiket (y) ayırıyoruz
+    pipeline = Pipeline([
+        ("preproc", preproc),
+        ("model", XGBRegressor(
+            n_estimators=100,
+            max_depth=6,
+            learning_rate=0.1,
+            random_state=42,
+            objective="reg:squarederror"
+        ))
+    ])
+
     X = df.drop("rating", axis=1)
     y = df["rating"]
 
-    # Eğitim ve test setlerine ayırma (test boyutu %20)
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+    # 4) 5-fold CV – RMSE
+    rmse = -cross_val_score(
+        pipeline, X, y,
+        scoring="neg_root_mean_squared_error",
+        cv=5
+    ).mean()
+    print("CV RMSE:", rmse)
 
-    # XGBoost modeli tanımlanıyor ve eğitim verileri ile eğitiliyor
-    model = xgb.XGBRegressor(
-        n_estimators=100,
-        max_depth=6,
-        learning_rate=0.1,
-        objective="reg:squarederror",
-        random_state=42
-    )
-    model.fit(X_train, y_train)
-
-    # Modelin test performansını ölçüyoruz (RMSE)
-    y_pred = model.predict(X_test)
-    rmse = mean_squared_error(y_test, y_pred, squared=False)
-    print("Test RMSE:", rmse)
-
-    # Eğitilmiş modeli ve scaler'ı dosyaya kaydediyoruz
-    joblib.dump(model, "xgboost_model.pkl")
-    joblib.dump(scaler, "scaler.pkl")
+    # 5) Final fit & kaydet
+    pipeline.fit(X, y)
+    os.makedirs("models", exist_ok=True)
+    joblib.dump(pipeline, "models/fit_pipeline.pkl")
+    print("✅ Model kaydedildi → models/fit_pipeline.pkl")
