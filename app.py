@@ -610,7 +610,6 @@ app.jinja_env.globals["program_stats"] = program_stats
 # --------------------------------------
 # PROGRAMI PUANLAMA (RATE PROGRAM)
 # --------------------------------------
-```python
 @app.route("/rate_program/<int:program_id>", methods=["GET", "POST"])
 def rate_program(program_id):
     user_id = session.get("user_id")
@@ -697,7 +696,6 @@ def rate_program(program_id):
 
     # GET isteğinde formu göster
     return render_template("rate_program.html", program=program)
-```
 
 
 # --------------------------------------
