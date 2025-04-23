@@ -116,6 +116,7 @@
             <input type="checkbox" name="chronic_conditions_options" value="Karaciğer Hastalıkları"> Karaciğer Hastalıkları<br>
             <input type="checkbox" name="chronic_conditions_options" value="Eklem Ağrıları"> Eklem Ağrıları<br>
             <input type="checkbox" name="chronic_conditions_options" value="Çölyak"> Çölyak<br>
+			<input type="checkbox" name="chronic_conditions_options" value="Yok"> Yok<br>
           </div>
           
           <!-- Ameliyat Geçmişi (Dropdown) -->
@@ -185,6 +186,7 @@
             <input type="checkbox" name="supplement_options" value="HMB"> HMB<br>
             <input type="checkbox" name="supplement_options" value="L-Carnitine"> L-Carnitine<br>
             <input type="checkbox" name="supplement_options" value="Curcumin"> Curcumin<br>
+			<input type="checkbox" name="supplement_options" value="Yok"> Yok<br>
           </div>
           
           <!-- Günlük Su Miktarı (Dropdown, 10 seçenek: 500 ml'den 5 L'e kadar) -->
@@ -296,5 +298,32 @@
       }
     }
   });
+  /* ---- "Yok" seçildiğinde diğerlerini kapat ---- */
+  function makeExclusive(groupName){
+    const boxes = document.getElementsByName(groupName);
+    boxes.forEach(cb=>{
+      if(cb.value === "Yok"){
+        // "Yok" tıklandı → diğerlerini kapat
+        cb.addEventListener('change', ()=>{
+          if(cb.checked){
+            boxes.forEach(b=>{ if(b!==cb) b.checked=false; });
+          }
+        });
+      }else{
+        // Diğer bir kutu tıklandı → "Yok"u kapat
+        cb.addEventListener('change', ()=>{
+          if(cb.checked){
+            boxes.forEach(b=>{
+              if(b.value==="Yok") b.checked=false;
+            });
+          }
+        });
+      }
+    });
+  }
+
+  // Kronik hastalıklar ve supplement grupları için çağır
+  makeExclusive('chronic_conditions_options');
+  makeExclusive('supplement_options');
 </script>
 {% endblock %}
