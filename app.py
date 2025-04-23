@@ -98,8 +98,8 @@ class UserProfile(db.Model):
     goals = db.Column(db.Text)
     city_id = db.Column(db.Integer, db.ForeignKey("cities.city_id"))
     district_id = db.Column(db.Integer, db.ForeignKey("districts.district_id"))
-    city_id     = db.Column(db.Integer, db.ForeignKey("cities.city_id"))
-    district_id = db.Column(db.Integer, db.ForeignKey("districts.district_id"))
+    city     = db.relationship("City",     backref="profiles", lazy="joined")
+    district = db.relationship("District", backref="profiles", lazy="joined")
     # Yeni eklenen alanlar:
     injury_history = db.Column(db.Text)  # Eğer ileride kullanmak isterseniz (HTML'de yer yoksa boş bırakılabilir)
     surgery_history = db.Column(db.String(100))
