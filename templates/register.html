@@ -78,20 +78,39 @@
 
           <!-- Hedefler (Structured Hedefler) -->
           <div class="mb-3">
-            <label class="form-label">Hedefleriniz</label>
-            <select class="form-select" name="goals" required>
-              <option value="">Seçiniz</option>
-              <option value="Sağlıklı Yaşam - Başlangıç">Sağlıklı Yaşam - Başlangıç</option>
-              <option value="Kilo Vermek - Temel">Kilo Vermek - Temel</option>
-              <option value="Kilo Vermek - İleri">Kilo Vermek - İleri</option>
-              <option value="Kas Yapmak - Temel">Kas Yapmak - Temel</option>
-              <option value="Kas Yapmak - İleri">Kas Yapmak - İleri</option>
-              <option value="Dayanıklılık Artırma - Temel">Dayanıklılık Artırma - Temel</option>
-              <option value="Dayanıklılık Artırma - İleri">Dayanıklılık Artırma - İleri</option>
-              <option value="Performans Geliştirme">Performans Geliştirme</option>
-              <option value="Profesyonel Sporcu Hedefleri">Profesyonel Sporcu Hedefleri</option>
-            </select>
-          </div>
+			  <label class="form-label">Hedefleriniz</label>
+			  <select class="form-select" name="goals" required>
+				<option value="">Seçiniz</option>
+
+				<!-- 🔵 Sağlıklı Yaşam / Fitness -->
+				<option value="Sağlıklı Yaşam - Başlangıç">Sağlıklı Yaşam – Başlangıç</option>
+				<option value="Sağlıklı Yaşam - Orta">Sağlıklı Yaşam – Orta</option>
+				<option value="Sağlıklı Yaşam - İleri">Sağlıklı Yaşam – İleri</option>
+
+				<!-- 🟢 Kilo Vermek (2-5 / 5-10 / 10+ kg) -->
+				<option value="Kilo Vermek - Hafif">Kilo Vermek – Hafif (≈ 2-5 kg)</option>
+				<option value="Kilo Vermek - Orta">Kilo Vermek – Orta (≈ 5-10 kg)</option>
+				<option value="Kilo Vermek - İleri">Kilo Vermek – İleri (≈ 10 kg+)</option>
+
+				<!-- 🟡 Kas Yapmak -->
+				<option value="Kas Yapmak - Başlangıç">Kas Yapmak – Başlangıç</option>
+				<option value="Kas Yapmak - Orta">Kas Yapmak – Orta</option>
+				<option value="Kas Yapmak - İleri">Kas Yapmak – İleri</option>
+
+				<!-- 🟠 Dayanıklılık Artırma -->
+				<option value="Dayanıklılık - Başlangıç">Dayanıklılık – Başlangıç</option>
+				<option value="Dayanıklılık - Orta">Dayanıklılık – Orta</option>
+				<option value="Dayanıklılık - İleri">Dayanıklılık – İleri</option>
+
+				<!-- 🟣 Performans Geliştirme -->
+				<option value="Performans - Başlangıç">Performans Geliştirme – Başlangıç</option>
+				<option value="Performans - Orta">Performans Geliştirme – Orta</option>
+				<option value="Performans - İleri">Performans Geliştirme – İleri</option>
+
+				<!-- 🔴 Profesyonel Sporcu -->
+				<option value="Profesyonel Sporcu">Profesyonel Sporcu (Specialized)</option>
+			  </select>
+		    </div>
 
           <!-- Sağlık ve Ek Bilgiler -->
           <h4 class="soru-metni">Sağlık ve Ek Bilgiler</h4>
