@@ -29,16 +29,20 @@ with app.app_context():
     JOIN programs p ON upr.program_id = p.id;
     """
 
-    # Verileri pandas DataFrame'e aktarın
+   # Verileri pandas DataFrame'e aktarın
     df = pd.read_sql(query, engine)
     print("Veri seti boyutu:", df.shape)
+
+    # Veri sayısını kontrol et: eğer veri 10 satırdan az ise eğitimi iptal et
+    if df.shape[0] < 10:
+        print("Uyarı: Yeterli veri bulunamadı, model eğitimi yapılmayacak.")
+        exit()
 
     # Kategorik sütunları sayısal değerlere çeviriyoruz
     categorical_cols = ["gender", "experience_level", "program_level", "type"]
     for col in categorical_cols:
         le = LabelEncoder()
         df[col] = le.fit_transform(df[col].astype(str))
-        # Not: Daha sonra canlıda aynı dönüşümleri yapabilmek için encoder'ları saklamak isteyebilirsiniz.
 
     # Sayısal verileri ölçeklendiriyoruz
     scaler = StandardScaler()
