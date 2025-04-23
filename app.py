@@ -610,6 +610,7 @@ app.jinja_env.globals["program_stats"] = program_stats
 # --------------------------------------
 # PROGRAMI PUANLAMA (RATE PROGRAM)
 # --------------------------------------
+```python
 @app.route("/rate_program/<int:program_id>", methods=["GET", "POST"])
 def rate_program(program_id):
     user_id = session.get("user_id")
@@ -631,7 +632,7 @@ def rate_program(program_id):
             if rating not in range(1, 6):
                 raise ValueError
         except ValueError:
-            flash("Puan 1‑5 arasında olmalı.")
+            flash("Puan 1-5 arasında olmalı.")
             return redirect(request.url)
 
         try:
@@ -639,7 +640,7 @@ def rate_program(program_id):
             if duration is not None and not 1 <= duration <= 600:
                 raise ValueError
         except ValueError:
-            flash("Kullanım süresi 1‑600 dakika arasında olmalı.")
+            flash("Kullanım süresi 1-600 dakika arasında olmalı.")
             return redirect(request.url)
 
         try:
@@ -647,23 +648,37 @@ def rate_program(program_id):
             if progress is not None and not 0 <= progress <= 100:
                 raise ValueError
         except ValueError:
-            flash("İlerleme %0‑100 arasında olmalı.")
+            flash("İlerleme %0-100 arasında olmalı.")
             return redirect(request.url)
 
-        # --- 3. Kaydet ---
-        new_rating = UserProgramRating(
-            user_id   = user_id,
-            program_id= program_id,
-            rating    = rating,
-            duration  = duration,
-            progress  = progress
-        )
-        db.session.add(new_rating)
-        db.session.commit()
-        
-        # >>>  BURADAN İTİBAREN EKLEYİN  <<<
+        # --- 3. Daha önce puanlanmış mı kontrolü ---
+        existing = UserProgramRating.query.filter_by(
+            user_id=user_id,
+            program_id=program_id
+        ).first()
+
+        if existing:
+            # Var olan kaydı güncelle
+            existing.rating   = rating
+            existing.duration = duration
+            existing.progress = progress
+            db.session.commit()
+            flash("Bu programı daha önce puanladınız, puanınız güncellendi!")
+        else:
+            # Yeni kayıt ekle
+            new_rating = UserProgramRating(
+                user_id    = user_id,
+                program_id = program_id,
+                rating     = rating,
+                duration   = duration,
+                progress   = progress
+            )
+            db.session.add(new_rating)
+            db.session.commit()
+            flash("Puanınız kaydedildi, teşekkürler!")
+
+        # --- 4. İleri seviye / kolay modal kontrolü ---
         if rating >= 4 and (progress or 0) >= 70:
-            # ileri seviye öner
             session["next_step_modal"] = {
                 "title":  "Tebrikler!",
                 "body":   "Bu programı neredeyse tamamladınız. İleri seviye bir programa geçmek ister misiniz?",
@@ -671,20 +686,18 @@ def rate_program(program_id):
                 "btn_url": url_for("sports", show_all="true")
             }
         elif rating <= 2:
-            # daha kolay öner
             session["next_step_modal"] = {
                 "title":  "Zor mu geldi?",
                 "body":   "Sizin için daha kolay programlar seçtik.",
                 "btn_txt": "Daha Kolay Programları Gör",
                 "btn_url": url_for("sports", show_all="true")
             }
-        # <<<  EKLEME BİTTİ  >>>
 
-        flash("Puanınız kaydedildi, teşekkürler!")
         return redirect(url_for("sports"))
 
-    # GET isteği: formu göster
+    # GET isteğinde formu göster
     return render_template("rate_program.html", program=program)
+```
 
 
 # --------------------------------------
