@@ -813,32 +813,30 @@ def profile():
     if not user_id:
         flash("Profil sayfasına erişmek için lütfen giriş yapın.")
         return redirect(url_for("login"))
-    
+
     user = User.query.get(user_id)
     if not user or not user.profile:
         flash("Profil bilgileriniz bulunamadı. Lütfen bilgilerinizi kaydedin.")
         return redirect(url_for("home"))
-    
-    # -------------- Özet metrikler --------------
-    total_started = UserProgram.query.filter_by(user_id=user_id).count()
-    total_rated  = UserProgramRating.query.filter_by(user_id=user_id).count()
-    avg_rating   = db.session.query(func.avg(UserProgramRating.rating)) \
-                      .filter(UserProgramRating.user_id == user_id).scalar() or 0
-    avg_rating   = round(avg_rating, 2)
 
-    # -------------- Puan dağılımı --------------
-    dist = dict(
-        db.session.query(
-            UserProgramRating.rating,
-            func.count(UserProgramRating.rating)
-        )
-        .filter(UserProgramRating.user_id == user_id)
-        .group_by(UserProgramRating.rating)
-        .all()
-    )
-    labels = [1,2,3,4,5]
-    data   = [dist.get(r, 0) for r in labels]
-    # ----------------------------------------------
+    # 1) Toplam başlanan program sayısı
+    total_started = UserProgram.query.filter_by(user_id=user_id).count()
+
+    # 2) Toplam puan verilen program sayısı
+    total_rated  = UserProgramRating.query.filter_by(user_id=user_id).count()
+
+    # 3) Ortalama puan (2 ondalık)
+    avg_rating = db.session.query(
+        func.coalesce(func.avg(UserProgramRating.rating), 0)
+    ).filter_by(user_id=user_id).scalar()
+    avg_rating = round(avg_rating, 2)
+
+    # 4) Puan dağılımı için etiketler ve sayılar
+    rating_labels = ["1", "2", "3", "4", "5"]
+    rating_data   = [
+        UserProgramRating.query.filter_by(user_id=user_id, rating=int(lbl)).count()
+        for lbl in rating_labels
+    ]
 
     return render_template(
         "profile.html",
@@ -847,10 +845,9 @@ def profile():
         total_started=total_started,
         total_rated=total_rated,
         avg_rating=avg_rating,
-        rating_labels=labels,
-        rating_data=data
+        rating_labels=rating_labels,
+        rating_data=rating_data
     )
-
 # --------------------------------------
 # UYGULAMAYI BAŞLAT
 # --------------------------------------
