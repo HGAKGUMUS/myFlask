@@ -1,6 +1,6 @@
 import os
 import re
-from datetime import datetime, date
+from datetime import datetime, date, timezone
 
 from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify
 from flask_sqlalchemy import SQLAlchemy
@@ -18,22 +18,45 @@ from lightgbm import LGBMRegressor
 from catboost import CatBoostRegressor
 
 import joblib
+import json
+from pathlib import Path
+
+# ---------------------------------
+# 0) Model metrics (RMSE & tarih) yükle
+# ---------------------------------
+METRICS_PATH = Path(__file__).parent / "models" / "metrics.json"
+
+def load_model_metrics():
+    if METRICS_PATH.exists():
+        with open(METRICS_PATH) as f:
+            data = json.load(f)
+            # UTC timestamp string → datetime objesi (isteğe bağlı)
+            try:
+                data["trained_at"] = datetime.fromisoformat(data["trained_at"])
+            except Exception:
+                pass
+            return data
+    return {"rmse": None, "trained_at": None}
+
+model_metrics = load_model_metrics()
+
+# Jinja’dan erişilebilsin
+# (app tanımlandıktan sonra da çalışır ama şimdilik import’ların ardından)
+# Seçeceğiniz yere taşıyabilirsiniz.
+# Aşağıda app = Flask(...)’den hemen sonra global olarak da kaydediyoruz.
 
 # ---------------------------------
 # Pipeline'ı yükle
 # ---------------------------------
 PIPELINE_PATH = os.path.join(os.path.dirname(__file__), "models", "fit_pipeline.pkl")
-pipeline = joblib.load(PIPELINE_PATH) if os.path.exists(PIPELINE_PATH) else None
+pipeline      = joblib.load(PIPELINE_PATH) if os.path.exists(PIPELINE_PATH) else None
 
 # ---------------------------------
 # Tahmin yardımcı fonksiyonu
 # ---------------------------------
 def predict_score(user, program):
-    """ML pipeline yüklüyse özellik satırını tahmine çevirir,
-    yoksa 0 döner (fallback)."""
     if pipeline is None:
         return 0
-
     feats = {
         "age": user.profile.age,
         "height": float(user.profile.height),
@@ -47,11 +70,13 @@ def predict_score(user, program):
     return pipeline.predict(pd.DataFrame([feats]))[0]
 
 
-
-
-
 app = Flask(__name__)
-app.secret_key = "dev_secret_key"  # Üretimde environment variable kullanın
+app.secret_key = "dev_secret_key"
+
+# Jinja’ya modeli ve metrikleri aç
+app.jinja_env.globals["pipeline"]       = pipeline
+app.jinja_env.globals["predict_score"]  = predict_score
+app.jinja_env.globals["model_metrics"]  = model_metrics
 
 # --------------------------------------
 # 1) VERİTABANI AYARI

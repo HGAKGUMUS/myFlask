@@ -1,5 +1,5 @@
-# train_model.py  –  güncel tam sürüm
-import os, joblib, pandas as pd
+import os, joblib, pandas as pd, json
+from datetime import datetime
 from sqlalchemy import create_engine
 from app import app, db
 from sklearn.model_selection import cross_val_score
@@ -65,3 +65,12 @@ with app.app_context():
     os.makedirs("models", exist_ok=True)
     joblib.dump(pipeline, "models/fit_pipeline.pkl")
     print("✅ Model kaydedildi → models/fit_pipeline.pkl")
+
+    # 6) Metrics kaydet
+    metrics = {
+        "rmse": float(rmse),
+        "trained_at": datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+    }
+    with open(os.path.join("models", "metrics.json"), "w") as f:
+        json.dump(metrics, f)
+    print(f"ℹ️ Metrics updated: {metrics}")
