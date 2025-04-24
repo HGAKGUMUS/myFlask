@@ -755,23 +755,35 @@ def profile():
         return redirect(url_for("home"))
     
     # -------------- Özet metrikler --------------
-    # Kaç program başlatılmış?
     total_started = UserProgram.query.filter_by(user_id=user_id).count()
-    # Kaç program puanlanmış?
     total_rated  = UserProgramRating.query.filter_by(user_id=user_id).count()
-    # Ortalama puan (0-5 arası)
     avg_rating   = db.session.query(func.avg(UserProgramRating.rating)) \
                       .filter(UserProgramRating.user_id == user_id).scalar() or 0
-    avg_rating = round(avg_rating, 2)
-    # ---------------------------------------------
-    
+    avg_rating   = round(avg_rating, 2)
+
+    # -------------- Puan dağılımı --------------
+    dist = dict(
+        db.session.query(
+            UserProgramRating.rating,
+            func.count(UserProgramRating.rating)
+        )
+        .filter(UserProgramRating.user_id == user_id)
+        .group_by(UserProgramRating.rating)
+        .all()
+    )
+    labels = [1,2,3,4,5]
+    data   = [dist.get(r, 0) for r in labels]
+    # ----------------------------------------------
+
     return render_template(
         "profile.html",
         user=user,
         profile=user.profile,
         total_started=total_started,
         total_rated=total_rated,
-        avg_rating=avg_rating
+        avg_rating=avg_rating,
+        rating_labels=labels,
+        rating_data=data
     )
 
 # --------------------------------------
