@@ -608,47 +608,43 @@ def sports():
         flash("Profil bilgileriniz eksik. Lütfen profilinizi güncelleyin.")
         return redirect(url_for("home"))
 
-    from sqlalchemy import or_, func
+
+
     show_all = request.args.get("show_all", "false").lower() == "true"
     query = Program.query
     if not show_all:
-        auto_gender = user.profile.gender if user.profile.gender else "unisex"
-        auto_level  = user.profile.experience_level.strip() if user.profile.experience_level else ""
-        query = query.filter(or_(Program.gender == auto_gender, Program.gender == "unisex"))
+        auto_gender = user.profile.gender or "unisex"
+        auto_level = (user.profile.experience_level or "").strip()
+        query = query.filter(or_(Program.gender == auto_gender,
+                                 Program.gender == "unisex"))
         if auto_level:
             query = query.filter(func.lower(Program.level) == auto_level.lower())
 
     programs = query.order_by(Program.name).all()
 
-    # >>> yeni satır – doğru girintiyle <<<
+    # — ÖNERİLENLER —
     recommended_programs = recommend_for_user(user)
-    
-    # — Önerilenlerde olanları genel listeden çıkar —
     recommended_ids = {p.id for p in recommended_programs}
     programs = [p for p in programs if p.id not in recommended_ids]
-    
-      # --------------------------------------
-    # TOPLU METRİK SORGUSU  (N+1'i bitir)
-    # --------------------------------------
-    all_ids = {p.id for p in recommended_programs}.union({p.id for p in programs})
-    if all_ids:
-        metrics_rows = (
-            db.session
-              .query(
-                  UserProgramRating.program_id.label("pid"),
-                  func.avg(UserProgramRating.rating).label("avg"),
-                  func.count(UserProgramRating.id).label("cnt"),
-                  func.avg(UserProgramRating.duration).label("avg_dur"),
-                  func.sum(
-                      case((UserProgramRating.progress >= 80, 1), else_=0)
-                  ).label("completed")
-              )
-              .filter(UserProgramRating.program_id.in_(all_ids))
-              .group_by(UserProgramRating.program_id)
-              .all()
-        )
 
-        # satırı Python sözlüğüne dönüştür
+    # ---------- TOPLU METRİK SORGUSU ----------
+    all_ids = {p.id for p in recommended_programs}.union({p.id for p in programs})
+    metrics = {}
+    if all_ids:
+        rows = (
+            db.session.query(
+                UserProgramRating.program_id.label("pid"),
+                func.avg(UserProgramRating.rating).label("avg"),
+                func.count(UserProgramRating.id).label("cnt"),
+                func.avg(UserProgramRating.duration).label("avg_dur"),
+                func.sum(
+                    case((UserProgramRating.progress >= 80, 1), else_=0)
+                ).label("completed")
+            )
+            .filter(UserProgramRating.program_id.in_(all_ids))
+            .group_by(UserProgramRating.program_id)
+            .all()
+        )
         metrics = {
             r.pid: {
                 "avg": round(float(r.avg or 0), 1),
@@ -656,20 +652,19 @@ def sports():
                 "avg_dur": round(float(r.avg_dur or 0), 1),
                 "comp_pct": round((r.completed / r.cnt * 100) if r.cnt else 0)
             }
-            for r in metrics_rows
+            for r in rows
         }
-    else:
-        metrics = {}
 
     modal_cfg = session.pop("next_step_modal", None)
 
-   return render_template(
+    return render_template(
         "sports.html",
         programs=programs,
         recommended_programs=recommended_programs,
-        metrics=metrics,          # ← eklendi
+        metrics=metrics,
         modal_cfg=modal_cfg
-)
+    )
+
 # --------------------------------------
 # KULLANICININ SEÇTİĞİ PROGRAMI İŞLEME (CHOOSE PROGRAM)
 # --------------------------------------
