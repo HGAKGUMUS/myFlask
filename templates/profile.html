@@ -2,53 +2,106 @@
 {% block title %}Profilim{% endblock %}
 
 {% block head %}
-  <!-- Chart.js CDN -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 {% endblock %}
 
 {% block content %}
 <div class="container mt-5">
   <!-- Renkli Özet Kartlar -->
-  <div class="row mb-4">
+  <div class="row g-3 mb-4">
     <div class="col-md-4">
-      <div class="card text-white bg-primary mb-3">
-        <div class="card-body text-center">
-          <h5 class="card-title">Başlanan Programlar</h5>
-          <p class="display-6">{{ total_started }}</p>
+      <div class="card text-white bg-primary">
+        <div class="card-body text-center py-3">
+          <h6 class="card-title mb-2">Başlanan Programlar</h6>
+          <p class="h2 mb-0">{{ total_started }}</p>
         </div>
       </div>
     </div>
     <div class="col-md-4">
-      <div class="card text-white bg-success mb-3">
-        <div class="card-body text-center">
-          <h5 class="card-title">Puan Verilen Programlar</h5>
-          <p class="display-6">{{ total_rated }}</p>
+      <div class="card text-white bg-success">
+        <div class="card-body text-center py-3">
+          <h6 class="card-title mb-2">Puan Verilen Programlar</h6>
+          <p class="h2 mb-0">{{ total_rated }}</p>
         </div>
       </div>
     </div>
     <div class="col-md-4">
-      <div class="card text-white bg-info mb-3">
-        <div class="card-body text-center">
-          <h5 class="card-title">Ortalama Puanınız</h5>
-          <p class="display-6">{{ avg_rating }} / 5</p>
+      <div class="card text-white bg-info">
+        <div class="card-body text-center py-3">
+          <h6 class="card-title mb-2">Ortalama Puanınız</h6>
+          <p class="h2 mb-0">{{ avg_rating }} / 5</p>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Puan Dağılımı Grafiği -->
-  <div class="card mb-5">
-    <div class="card-header text-center">
-      Puan Dağılımınız
+  <!-- Puan Dağılımı Grafiği (küçük, ortalanmış) -->
+  <div class="d-flex justify-content-center mb-5">
+    <div style="width:250px; max-width:90%;">
+      <canvas id="ratingChart"></canvas>
     </div>
+  </div>
+
+  <!-- Profil Bilgileri Başlığı -->
+  <h4 class="mb-3 text-center">Profil Bilgileriniz</h4>
+
+  <!-- Detaylı Profil Bilgileri Kartı -->
+  <div class="card shadow-sm">
     <div class="card-body">
-      <canvas id="ratingChart" height="200"></canvas>
+      <dl class="row mb-0">
+        <dt class="col-sm-3">Adı</dt>
+        <dd class="col-sm-9">{{ profile.name }}</dd>
+
+        <dt class="col-sm-3">Kullanıcı Adı</dt>
+        <dd class="col-sm-9">{{ user.username }}</dd>
+
+        <dt class="col-sm-3">Email</dt>
+        <dd class="col-sm-9">{{ user.email }}</dd>
+
+        <dt class="col-sm-3">Cinsiyet</dt>
+        <dd class="col-sm-9">{{ profile.gender }}</dd>
+
+        <dt class="col-sm-3">Yaş</dt>
+        <dd class="col-sm-9">{{ profile.age }}</dd>
+
+        <dt class="col-sm-3">Boy (cm)</dt>
+        <dd class="col-sm-9">{{ profile.height }}</dd>
+
+        <dt class="col-sm-3">Kilo (kg)</dt>
+        <dd class="col-sm-9">{{ profile.weight }}</dd>
+
+        <dt class="col-sm-3">Burç</dt>
+        <dd class="col-sm-9">{{ profile.zodiac }}</dd>
+
+        <dt class="col-sm-3">Deneyim Seviyesi</dt>
+        <dd class="col-sm-9">{{ profile.experience_level }}</dd>
+
+        <dt class="col-sm-3">Hedef</dt>
+        <dd class="col-sm-9">{{ profile.goals }}</dd>
+
+        <dt class="col-sm-3">Şehir / İlçe</dt>
+        <dd class="col-sm-9">
+          {{ profile.city.city_name if profile.city }}{% if profile.city and profile.district %} / {% endif %}
+          {{ profile.district.district_name if profile.district }}
+        </dd>
+
+        <dt class="col-sm-3">Kronik Hastalıklar</dt>
+        <dd class="col-sm-9">{{ profile.chronic_conditions or "Yok" }}</dd>
+
+        <dt class="col-sm-3">Ameliyat Geçmişi</dt>
+        <dd class="col-sm-9">{{ profile.surgery_history or "Yok" }}</dd>
+
+        <dt class="col-sm-3">İlaç Kullanımı</dt>
+        <dd class="col-sm-9">{{ profile.medications or "Yok" }}</dd>
+
+        <dt class="col-sm-3">Supplement Kullanımı</dt>
+        <dd class="col-sm-9">{{ profile.supplement_usage or "Yok" }}</dd>
+
+        <dt class="col-sm-3">Günlük Su Miktarı</dt>
+        <dd class="col-sm-9">{{ profile.daily_water_intake or "Belirtilmedi" }}</dd>
+      </dl>
     </div>
   </div>
-
-  <!-- Mevcut Profil Bilgileri -->
-  <h2 class="mb-4 text-center">Profil Bilgileriniz</h2>
-  <!-- … geri kalan profile detayları … -->
 </div>
 {% endblock %}
 
@@ -61,15 +114,15 @@
       labels: {{ rating_labels | tojson }},
       datasets: [{
         data: {{ rating_data | tojson }},
-        backgroundColor: [
-          '#ff6384','#36a2eb','#ffcd56','#4bc0c0','#9966ff'
-        ]
+        backgroundColor: ['#ff6384','#36a2eb','#ffcd56','#4bc0c0','#9966ff']
       }]
     },
     options: {
       plugins: {
-        legend: { position: 'bottom' }
-      }
+        legend: { position: 'bottom', labels: { boxWidth:12, padding:10 } }
+      },
+      cutout: '70%',
+      maintainAspectRatio: true
     }
   });
 </script>
