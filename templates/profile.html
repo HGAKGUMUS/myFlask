@@ -3,6 +3,35 @@
 
 {% block content %}
 <div class="container mt-5">
+  <!-- Özet Kartlar -->
+  <div class="row mb-4">
+    <div class="col-md-4">
+      <div class="card text-center">
+        <div class="card-body">
+          <h5 class="card-title">Başlanan Programlar</h5>
+          <p class="display-6">{{ total_started }}</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card text-center">
+        <div class="card-body">
+          <h5 class="card-title">Puan Verilen Programlar</h5>
+          <p class="display-6">{{ total_rated }}</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card text-center">
+        <div class="card-body">
+          <h5 class="card-title">Ortalama Puanınız</h5>
+          <p class="display-6">{{ avg_rating }} / 5</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mevcut Profil Bilgileri -->
   <h2 class="mb-4 text-center">Profil Bilgileriniz</h2>
   <div class="card shadow-sm">
     <div class="card-body">
