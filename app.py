@@ -9,6 +9,7 @@ from sqlalchemy.exc import IntegrityError   # <‑‑ bunu ekleyin
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
+from sqlalchemy import case, func
 from xgboost import XGBRegressor
 from lightgbm import LGBMRegressor
 from catboost import CatBoostRegressor
@@ -634,19 +635,40 @@ def choose_program(program_id):
 # --------------------------------------
 # Program için ortalama puan & toplam oy
 # --------------------------------------
-def program_stats(program_id):
-    avg_rating, num_ratings = (
-        db.session.query(
-            func.coalesce(func.avg(UserProgramRating.rating), 0),
-            func.count(UserProgramRating.id)
-        )
-        .filter(UserProgramRating.program_id == program_id)
-        .first()
-    )
-    return float(avg_rating), int(num_ratings)
 
-# Jinja'da global hâle getir – BLOK DIŞINDA!
-app.jinja_env.globals["program_stats"] = program_stats
+def program_metrics(program_id):
+    # Ortalama kullanım süresi (dakika)
+    avg_duration = (
+        db.session.query(func.coalesce(func.avg(UserProgramRating.duration), 0))
+        .filter(UserProgramRating.program_id == program_id)
+        .scalar()
+    )
+    avg_duration = round(avg_duration, 1)
+    
+    # Toplam puan sayısı
+    total = (
+        db.session.query(func.count(UserProgramRating.id))
+        .filter(UserProgramRating.program_id == program_id)
+        .scalar()
+    ) or 0
+
+    # >= %80 ilerleme yapan sayısı
+    completed = (
+        db.session.query(func.count(UserProgramRating.id))
+        .filter(
+            UserProgramRating.program_id == program_id,
+            UserProgramRating.progress >= 80
+        )
+        .scalar()
+    ) or 0
+
+    # Tamamlama oranı %
+    comp_pct = round((completed / total * 100), 0) if total else 0
+
+    return avg_duration, int(comp_pct)
+
+# Jinja’ya global olarak ekleyin
+app.jinja_env.globals['program_metrics'] = program_metrics
 
 # --------------------------------------
 # PROGRAMI PUANLAMA (RATE PROGRAM)

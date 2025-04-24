@@ -22,37 +22,38 @@
             <p class="mb-1">
               ⭐ {{ "%.1f"|format(avg) }} / 5 <span class="text-muted">({{ cnt }} oy)</span>
             </p>
+            {# Yeni metrikler eklendi #}
+            {% set avg_dur, comp_pct = program_metrics(program.id) %}
             <p class="card-text">
               <strong>Seviye:</strong> {{ program.level }}<br>
-              <strong>Süre:</strong> {{ program.duration }} dk<br>
-              <strong>Cinsiyet:</strong> {{ program.gender }}<br>
-              <strong>Zorluk:</strong> {{ program.difficulty }}<br>
               <strong>Tür:</strong> {{ program.type }}<br>
-              <strong>Dinlenme:</strong> {{ program.rest_intervals }}
+              <strong>Dinlenme:</strong> {{ program.rest_intervals }}<br>
+              <span>⏱ <em>{{ avg_dur }} dk ort. kullanım</em></span> •
+              <span>✅ <em>{{ comp_pct }}% tamamlama</em></span>
             </p>
             <p class="small text-muted">{{ program.exercise_steps or "Bilgi yok." }}</p>
           </div>
           <div class="card-footer bg-white border-0">
-		  <!-- Programı Başlat: ilerleme takibi için -->
-		  <a
-			href="{{ url_for('choose_program', program_id=program.id) }}"
-			class="btn btn-primary w-100"
-			data-bs-toggle="tooltip"
-			title="Programınızı başlatır; ilerlemenizi takip eder.">
-			Programı Başlat
-		  </a>
-		  <small class="text-muted d-block text-center mt-1">
-			İlk önce “Başlat” → Deneyimi Değerlendir
-		  </small>
-		  <!-- Deneyimi Değerlendir: puanlama -->
-		  <a
-			href="{{ url_for('rate_program', program_id=program.id) }}"
-			class="btn btn-outline-info w-100 mt-2"
-			data-bs-toggle="tooltip"
-			title="Programı denedikten sonra buradan puan ve sürenizi girin.">
-			Deneyimi Değerlendir
-		  </a>
-		  </div>
+            <!-- Programı Başlat: ilerleme takibi için -->
+            <a
+              href="{{ url_for('choose_program', program_id=program.id) }}"
+              class="btn btn-primary w-100"
+              data-bs-toggle="tooltip"
+              title="Programınızı başlatır; ilerlemenizi takip eder.">
+              Programı Başlat
+            </a>
+            <small class="text-muted d-block text-center mt-1">
+              İlk önce “Başlat” → Deneyimi Değerlendir
+            </small>
+            <!-- Deneyimi Değerlendir: puanlama -->
+            <a
+              href="{{ url_for('rate_program', program_id=program.id) }}"
+              class="btn btn-outline-info w-100 mt-2"
+              data-bs-toggle="tooltip"
+              title="Programı denedikten sonra buradan puan ve sürenizi girin.">
+              Deneyimi Değerlendir
+            </a>
+          </div>
         </div>
       </div>
     {% endfor %}
@@ -68,19 +69,19 @@
     <div class="col">
       <div class="card h-100 shadow-sm">
         <div class="card-body">
-          <!-- Burada title, puan, detaylar… -->
           <h5 class="card-title">{{ program.name }}</h5>
           {% set avg, cnt = program_stats(program.id) %}
           <p class="mb-1">
             ⭐ {{ "%.1f"|format(avg) }} / 5 <span class="text-muted">({{ cnt }} oy)</span>
           </p>
+          {# Yeni metrikler eklendi #}
+          {% set avg_dur, comp_pct = program_metrics(program.id) %}
           <p class="card-text">
             <strong>Seviye:</strong> {{ program.level }}<br>
-            <strong>Süre:</strong> {{ program.duration }} dk<br>
-            <strong>Cinsiyet:</strong> {{ program.gender }}<br>
-            <strong>Zorluk:</strong> {{ program.difficulty }}<br>
             <strong>Tür:</strong> {{ program.type }}<br>
-            <strong>Dinlenme:</strong> {{ program.rest_intervals }}
+            <strong>Dinlenme:</strong> {{ program.rest_intervals }}<br>
+            <span>⏱ <em>{{ avg_dur }} dk ort. kullanım</em></span> •
+            <span>✅ <em>{{ comp_pct }}% tamamlama</em></span>
           </p>
           <p class="small text-muted">{{ program.exercise_steps or "Bilgi yok." }}</p>
         </div>
@@ -108,7 +109,6 @@
     </div>
   {% endfor %}
 </div>
-
 
 {# ---------------- Modal (puan sonrası) ---------------- #}
 {% if modal_cfg %}
