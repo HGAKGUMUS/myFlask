@@ -33,9 +33,26 @@
             <p class="small text-muted">{{ program.exercise_steps or "Bilgi yok." }}</p>
           </div>
           <div class="card-footer bg-white border-0">
-            <a href="{{ url_for('choose_program', program_id=program.id) }}" class="btn btn-primary w-100">Programı Seç</a>
-            <a href="{{ url_for('rate_program', program_id=program.id) }}" class="btn btn-outline-info w-100 mt-2">Puan Ver</a>
-          </div>
+		  <!-- Programı Başlat: ilerleme takibi için -->
+		  <a
+			href="{{ url_for('choose_program', program_id=program.id) }}"
+			class="btn btn-primary w-100"
+			data-bs-toggle="tooltip"
+			title="Programınızı başlatır; ilerlemenizi takip eder.">
+			Programı Başlat
+		  </a>
+		  <small class="text-muted d-block text-center mt-1">
+			İlk önce “Başlat” → Deneyimi Değerlendir
+		  </small>
+		  <!-- Deneyimi Değerlendir: puanlama -->
+		  <a
+			href="{{ url_for('rate_program', program_id=program.id) }}"
+			class="btn btn-outline-info w-100 mt-2"
+			data-bs-toggle="tooltip"
+			title="Programı denedikten sonra buradan puan ve sürenizi girin.">
+			Deneyimi Değerlendir
+		  </a>
+		  </div>
         </div>
       </div>
     {% endfor %}
@@ -51,6 +68,7 @@
     <div class="col">
       <div class="card h-100 shadow-sm">
         <div class="card-body">
+          <!-- Burada title, puan, detaylar… -->
           <h5 class="card-title">{{ program.name }}</h5>
           {% set avg, cnt = program_stats(program.id) %}
           <p class="mb-1">
@@ -67,13 +85,30 @@
           <p class="small text-muted">{{ program.exercise_steps or "Bilgi yok." }}</p>
         </div>
         <div class="card-footer bg-white border-0">
-          <a href="{{ url_for('choose_program', program_id=program.id) }}" class="btn btn-primary w-100">Programı Seç</a>
-          <a href="{{ url_for('rate_program', program_id=program.id) }}" class="btn btn-outline-info w-100 mt-2">Puan Ver</a>
+          <!-- Güncellenmiş butonlar -->
+          <a
+            href="{{ url_for('choose_program', program_id=program.id) }}"
+            class="btn btn-primary w-100"
+            data-bs-toggle="tooltip"
+            title="Programınızı başlatır; ilerlemenizi takip eder.">
+            Programı Başlat
+          </a>
+          <small class="text-muted d-block text-center mt-1">
+            İlk önce “Başlat” → Deneyimi Değerlendir
+          </small>
+          <a
+            href="{{ url_for('rate_program', program_id=program.id) }}"
+            class="btn btn-outline-info w-100 mt-2"
+            data-bs-toggle="tooltip"
+            title="Programı denedikten sonra buradan puan ve sürenizi girin.">
+            Deneyimi Değerlendir
+          </a>
         </div>
       </div>
     </div>
   {% endfor %}
 </div>
+
 
 {# ---------------- Modal (puan sonrası) ---------------- #}
 {% if modal_cfg %}
