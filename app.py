@@ -9,6 +9,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from sqlalchemy import text, or_, func, case
 from sqlalchemy.exc import IntegrityError
 
+
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
@@ -625,16 +626,50 @@ def sports():
     # — Önerilenlerde olanları genel listeden çıkar —
     recommended_ids = {p.id for p in recommended_programs}
     programs = [p for p in programs if p.id not in recommended_ids]
+    
+      # --------------------------------------
+    # TOPLU METRİK SORGUSU  (N+1'i bitir)
+    # --------------------------------------
+    all_ids = {p.id for p in recommended_programs}.union({p.id for p in programs})
+    if all_ids:
+        metrics_rows = (
+            db.session
+              .query(
+                  UserProgramRating.program_id.label("pid"),
+                  func.avg(UserProgramRating.rating).label("avg"),
+                  func.count(UserProgramRating.id).label("cnt"),
+                  func.avg(UserProgramRating.duration).label("avg_dur"),
+                  func.sum(
+                      case((UserProgramRating.progress >= 80, 1), else_=0)
+                  ).label("completed")
+              )
+              .filter(UserProgramRating.program_id.in_(all_ids))
+              .group_by(UserProgramRating.program_id)
+              .all()
+        )
+
+        # satırı Python sözlüğüne dönüştür
+        metrics = {
+            r.pid: {
+                "avg": round(float(r.avg or 0), 1),
+                "cnt": r.cnt,
+                "avg_dur": round(float(r.avg_dur or 0), 1),
+                "comp_pct": round((r.completed / r.cnt * 100) if r.cnt else 0)
+            }
+            for r in metrics_rows
+        }
+    else:
+        metrics = {}
 
     modal_cfg = session.pop("next_step_modal", None)
 
-    return render_template(
+   return render_template(
         "sports.html",
         programs=programs,
         recommended_programs=recommended_programs,
-        modal_cfg=modal_cfg 
-    )
-
+        metrics=metrics,          # ← eklendi
+        modal_cfg=modal_cfg
+)
 # --------------------------------------
 # KULLANICININ SEÇTİĞİ PROGRAMI İŞLEME (CHOOSE PROGRAM)
 # --------------------------------------
