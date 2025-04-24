@@ -22,7 +22,6 @@
             <p class="mb-1">
               ⭐ {{ "%.1f"|format(avg) }} / 5 <span class="text-muted">({{ cnt }} oy)</span>
             </p>
-            {# Yeni metrikler eklendi #}
             {% set avg_dur, comp_pct = program_metrics(program.id) %}
             <p class="card-text">
               <strong>Seviye:</strong> {{ program.level }}<br>
@@ -34,7 +33,6 @@
             <p class="small text-muted">{{ program.exercise_steps or "Bilgi yok." }}</p>
           </div>
           <div class="card-footer bg-white border-0">
-            <!-- Programı Başlat: ilerleme takibi için -->
             <a
               href="{{ url_for('choose_program', program_id=program.id) }}"
               class="btn btn-primary w-100"
@@ -45,7 +43,6 @@
             <small class="text-muted d-block text-center mt-1">
               İlk önce “Başlat” → Deneyimi Değerlendir
             </small>
-            <!-- Deneyimi Değerlendir: puanlama -->
             <a
               href="{{ url_for('rate_program', program_id=program.id) }}"
               class="btn btn-outline-info w-100 mt-2"
@@ -74,7 +71,6 @@
           <p class="mb-1">
             ⭐ {{ "%.1f"|format(avg) }} / 5 <span class="text-muted">({{ cnt }} oy)</span>
           </p>
-          {# Yeni metrikler eklendi #}
           {% set avg_dur, comp_pct = program_metrics(program.id) %}
           <p class="card-text">
             <strong>Seviye:</strong> {{ program.level }}<br>
@@ -86,7 +82,6 @@
           <p class="small text-muted">{{ program.exercise_steps or "Bilgi yok." }}</p>
         </div>
         <div class="card-footer bg-white border-0">
-          <!-- Güncellenmiş butonlar -->
           <a
             href="{{ url_for('choose_program', program_id=program.id) }}"
             class="btn btn-primary w-100"

@@ -1,21 +1,23 @@
 import os
 import re
 from datetime import datetime, date
+
 from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
-from sqlalchemy import text, or_, func
-from sqlalchemy.exc import IntegrityError   # <‑‑ bunu ekleyin
+
+from sqlalchemy import text, or_, func, case
+from sqlalchemy.exc import IntegrityError
+
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
-from sqlalchemy import case, func
+
 from xgboost import XGBRegressor
 from lightgbm import LGBMRegressor
 from catboost import CatBoostRegressor
-# app.py'nin en üst kısmına (import’ların hemen altına) ekli olmalı
-import joblib
 
+import joblib
 
 # ---------------------------------
 # Pipeline'ı yükle
@@ -632,6 +634,22 @@ def choose_program(program_id):
         flash("Program bulunamadı!")
         return redirect(url_for("sports"))
 
+# --------------------------------------
+# 2) HELPER FONKSİYONLAR
+# --------------------------------------
+def program_stats(program_id):
+    """Her program için ortalama puan ve oy sayısını döner."""
+    avg_rating, num_ratings = (
+        db.session.query(
+            func.coalesce(func.avg(UserProgramRating.rating), 0),
+            func.count(UserProgramRating.id)
+        )
+        .filter(UserProgramRating.program_id == program_id)
+        .first()
+    )
+    return float(avg_rating), int(num_ratings)
+
+app.jinja_env.globals['program_stats'] = program_stats
 # --------------------------------------
 # Program için ortalama puan & toplam oy
 # --------------------------------------
