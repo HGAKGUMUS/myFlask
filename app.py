@@ -681,7 +681,7 @@ def sports():
     # ——— 2. adım: başlanan ve puanlanan program ID’leri ———
     started_ids = {up.program_id for up in user.user_programs}
  # ——— 2. adım: başlanan ve puanlanan program ID’leri ———
-    started_ids = {up.program_id for up in user.user_programs}
+# Kullanıcı puan verdiği programlar:
     rated_ids = {
         upr.program_id
         for upr in UserProgramRating.query.filter_by(user_id=user_id).all()
