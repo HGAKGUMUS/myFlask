@@ -2,6 +2,7 @@ import os
 import re
 from datetime import datetime, date, timezone
 
+
 from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -679,14 +680,12 @@ def sports():
 
     # ——— 2. adım: başlanan ve puanlanan program ID’leri ———
     started_ids = {up.program_id for up in user.user_programs}
-    rated_ids   = {upr.program_id for upr in user.user_program_ratings}
-    # Başlanan program ID’leri (mevcut ilişki üzerinden)
+ # ——— 2. adım: başlanan ve puanlanan program ID’leri ———
     started_ids = {up.program_id for up in user.user_programs}
-    # Puanlanan program ID’leri (user.user_program_ratings ilişkisi yok, doğrudan sorgu yapıyoruz)
     rated_ids = {
-         upr.program_id
-         for upr in UserProgramRating.query.filter_by(user_id=user_id).all()
-     }
+        upr.program_id
+        for upr in UserProgramRating.query.filter_by(user_id=user_id).all()
+    }
     modal_cfg = session.pop("next_step_modal", None)
 
     return render_template(
