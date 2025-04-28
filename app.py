@@ -692,6 +692,8 @@ def sports():
 # --------------------------------------
 # KULLANICININ SEÇTİĞİ PROGRAMI İŞLEME (CHOOSE PROGRAM)
 # --------------------------------------
+from datetime import date  # dosyanın en üstünde ekleyin
+
 @app.route("/choose_program/<int:program_id>")
 def choose_program(program_id):
     user_id = session.get("user_id")
@@ -699,20 +701,29 @@ def choose_program(program_id):
         flash("Önce giriş yapmanız gerekir!")
         return redirect(url_for("login"))
 
-    program = Program.query.get(program_id)
-    if program:
-        # Aynı programı tekrar seçmesin
-        existing = UserProgram.query.filter_by(user_id=user_id, program_id=program_id).first()
-        if not existing:
-            new_user_program = UserProgram(user_id=user_id, program_id=program_id)
-            db.session.add(new_user_program)
-            db.session.commit()
-        # ⚠️ Direkt puan verme ekranına yönlendir
-        return redirect(url_for("rate_program", program_id=program_id))
-    else:
-        flash("Program bulunamadı!")
-        return redirect(url_for("sports"))
+    # Program var mı kontrol et (404 döndürürse sports'a yönlendirirsiniz)
+    program = Program.query.get_or_404(program_id)
 
+    # Eğer daha önce başlamamışsa, user_programs tablosuna kaydet
+    existing = UserProgram.query.filter_by(
+        user_id=user_id, program_id=program_id
+    ).first()
+    if not existing:
+        new_up = UserProgram(
+            user_id=user_id,
+            program_id=program_id,
+            start_date=date.today(),
+            progress=0,
+            status="active"
+        )
+        db.session.add(new_up)
+        db.session.commit()
+        flash("Program başlatıldı! İstediğiniz zaman bitirip puanlayabilirsiniz.")
+    else:
+        flash("Bu programı zaten başlatmışsınız.")
+
+    # Artık rate_program'a değil, doğrudan sports sayfasına dönüyoruz
+    return redirect(url_for("sports"))
 # --------------------------------------
 # 2) HELPER FONKSİYONLAR
 # --------------------------------------
