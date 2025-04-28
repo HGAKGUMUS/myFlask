@@ -40,18 +40,23 @@
         <div class="card h-100 shadow-sm">
           <div class="card-body">
             <h5 class="card-title">
-			  {{ program.name }}
-			  {# ↓ Bu satırları ekleyin ↓ #}
-			  {% if program.days_per_week %}
-				<span class="badge bg-secondary ms-1">
-				  <i class="bi {{ 'bi-calendar3' if program.days_per_week==1 else 'bi-calendar3-week' }}"></i>
-				  {{ program.days_per_week }} Günlük
-				</span>
-			  {% endif %}
-			  {% if program.focus_area %}
-				<span class="badge bg-warning text-dark ms-1">{{ program.focus_area }}</span>
-			  {% endif %}
-			</h5>
+              {{ program.name }}
+
+              {# Günlük rozeti #}
+              {% if program.days_per_week %}
+                <span class="badge border-secondary text-secondary ms-1">
+                  <i class="bi {{ 'bi-calendar3' if program.days_per_week==1 else 'bi-calendar3-week' }}"></i>
+                  {{ program.days_per_week }} Günlük
+                </span>
+              {% endif %}
+
+              {# Tür rozeti #}
+              {% if program.type %}
+                <span class="badge bg-warning text-dark ms-1">
+                  Tür: {{ program.type }}
+                </span>
+              {% endif %}
+            </h5>
 
             {#  <<< BU YENİ SATIR  #}
             {% set m = metrics.get(program.id, {'avg':0,'cnt':0,'avg_dur':0,'comp_pct':0}) %}
@@ -104,20 +109,24 @@
   {% for program in programs %}
     <div class="col">
       <div class="card h-100 shadow-sm">
-		<div class="card-body">
-		    <h5 class="card-title">
-			  {{ program.name }}
-			  {# ↓ Bu satırları ekleyin ↓ #}
-			  {% if program.days_per_week %}
-				<span class="badge bg-secondary ms-1">
-				  <i class="bi {{ 'bi-calendar3' if program.days_per_week==1 else 'bi-calendar3-week' }}"></i>
-				  {{ program.days_per_week }} Günlük
-				</span>
-			  {% endif %}
-			  {% if program.focus_area %}
-				<span class="badge bg-warning text-dark ms-1">{{ program.focus_area }}</span>
-			  {% endif %}
-			</h5>
+        <div class="card-body">
+          <h5 class="card-title">
+            {{ program.name }}
+
+            {# Günlük rozeti #}
+            {% if program.days_per_week %}
+              <span class="badge border-secondary text-secondary ms-1">
+                <i class="bi {{ 'bi-calendar3' if program.days_per_week==1 else 'bi-calendar3-week' }}"></i>
+                {{ program.days_per_week }} Günlük
+              </span>
+            {% endif %}
+            {# Odak / Tür rozeti #}
+            {% if program.type %}
+              <span class="badge bg-warning text-dark ms-1">
+                Tür: {{ program.type }}
+              </span>
+            {% endif %}
+          </h5>
 
 		  {% set m = metrics.get(program.id, {'avg':0,'cnt':0,'avg_dur':0,'comp_pct':0}) %}
 
