@@ -50,12 +50,12 @@
                 </span>
               {% endif %}
 
-              {# Tür rozeti #}
-              {% if program.type %}
-                <span class="badge bg-warning text-dark ms-1">
-                  Tür: {{ program.type }}
-                </span>
-              {% endif %}
+			  {# Odak/Tür rozeti (şimdi focus_area gösteriyor) #}
+			  {% if program.focus_area %}
+			    <span class="badge bg-warning text-dark ms-1">
+			      Tür: {{ program.focus_area }}
+			    </span>
+			  {% endif %}
             </h5>
 
             {% set m = metrics.get(program.id, {'avg':0,'cnt':0,'avg_dur':0,'comp_pct':0}) %}
@@ -149,12 +149,12 @@
               </span>
             {% endif %}
 
-            {# Tür rozeti #}
-            {% if program.type %}
-              <span class="badge bg-info text-white ms-1">
-                Tür: {{ program.type }}
-              </span>
-            {% endif %}
+			{# Odak/Tür rozeti (şimdi focus_area gösteriyor) #}
+			{% if program.focus_area %}
+			  <span class="badge bg-warning text-dark ms-1">
+			    Tür: {{ program.focus_area }}
+			  </span>
+			{% endif %}
           </h5>
 
           {% set m = metrics.get(program.id, {'avg':0,'cnt':0,'avg_dur':0,'comp_pct':0}) %}
