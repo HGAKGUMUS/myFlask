@@ -173,7 +173,6 @@ class Program(db.Model):
         # 🆕  --- meta sütunları ---
     days_per_week = db.Column(db.Integer)        # 1 · 3 · 5
     focus_area    = db.Column(db.String(30))      # Full Body · Split
-    program_group = db.Column(db.String(100))     # Mix A · Split A ...
     weeks_total   = db.Column(db.Integer)         # opsiyonel
 
 class UserProgramRating(db.Model):
