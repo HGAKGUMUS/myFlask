@@ -20,7 +20,7 @@
     </div>
     <div class="col-auto">
       <select name="focus" class="form-select" onchange="this.form.submit()">
-        <option value="">Odak</option>
+        <option value="">Program Türü</option>
         <option {% if request.args.get('focus')=='Full Body' %}selected{% endif %}>Full Body</option>
         <option {% if request.args.get('focus')=='Hybrid' %}selected{% endif %}>Hybrid</option>
       </select>
