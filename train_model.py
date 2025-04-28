@@ -1,4 +1,7 @@
-import os, joblib, pandas as pd, json
+import os
+import joblib
+import pandas as pd
+import json
 from datetime import datetime
 from sqlalchemy import create_engine
 from app import app, db
@@ -9,14 +12,18 @@ from sklearn.preprocessing import StandardScaler, OneHotEncoder
 from xgboost import XGBRegressor
 
 with app.app_context():
-    # 1) Veriyi çek
+    # 1) Veriyi çek, yeni sütunları da include et
     engine = create_engine(db.engine.url)
     df = pd.read_sql("""
         SELECT upr.rating,
                up.age, up.gender, up.experience_level,
                up.height, up.weight,
-               p.level  AS program_level,
-               p.difficulty, p.type, p.duration
+               p.level        AS program_level,
+               p.difficulty,
+               p.type,
+               p.duration,
+               p.days_per_week,
+               p.focus_area
         FROM user_program_ratings upr
         JOIN user_profiles up ON upr.user_id = up.user_id
         JOIN programs       p ON upr.program_id = p.id
@@ -29,12 +36,12 @@ with app.app_context():
         print("⚠️ 10’dan az kayıt var → model eğitimi atlandı.")
         exit()
 
-    # 3) Pipeline
-    num_cols = ["age", "height", "weight", "duration"]
-    cat_cols = ["gender", "experience_level", "program_level", "type"]
+    # 3) Pipeline: yeni feature’lar ekli
+    num_cols = ["age", "height", "weight", "duration", "days_per_week"]
+    cat_cols = ["gender", "experience_level", "program_level", "type", "focus_area"]
 
     preproc = ColumnTransformer([
-        ("num", StandardScaler(),                 num_cols),
+        ("num", StandardScaler(), num_cols),
         ("cat", OneHotEncoder(handle_unknown="ignore"), cat_cols)
     ])
 
@@ -49,10 +56,11 @@ with app.app_context():
         ))
     ])
 
+    # 4) Split X/y
     X = df.drop("rating", axis=1)
     y = df["rating"]
 
-    # 4) 5-fold CV – RMSE
+    # 5) 5-fold CV – RMSE
     rmse = -cross_val_score(
         pipeline, X, y,
         scoring="neg_root_mean_squared_error",
@@ -60,13 +68,13 @@ with app.app_context():
     ).mean()
     print("CV RMSE:", rmse)
 
-    # 5) Final fit & kaydet
+    # 6) Final fit & kaydet
     pipeline.fit(X, y)
     os.makedirs("models", exist_ok=True)
     joblib.dump(pipeline, "models/fit_pipeline.pkl")
     print("✅ Model kaydedildi → models/fit_pipeline.pkl")
 
-    # 6) Metrics kaydet
+    # 7) Metrics kaydet
     metrics = {
         "rmse": float(rmse),
         "trained_at": datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")

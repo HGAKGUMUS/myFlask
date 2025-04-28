@@ -3,9 +3,33 @@
 
 {% block content %}
 
-<div class="d-flex justify-content-between align-items-center mb-4">
-  <h2 class="soru-metni mb-0">Spor Programları</h2>
-</div>
+  <!-- Başlık -->
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="soru-metni mb-0">Spor Programları</h2>
+  </div>
+
+  <!-- ★ Filter Form – buraya ekleyin -->
+  <form class="row g-2 mb-4">
+    <div class="col-auto">
+      <select name="days" class="form-select" onchange="this.form.submit()">
+        <option value="">Gün sayısı</option>
+        {% for d in [1,3,5] %}
+          <option value="{{d}}" {{ 'selected' if request.args.get('days') == d|string }}>{{d}} Günlük</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-auto">
+      <select name="focus" class="form-select" onchange="this.form.submit()">
+        <option value="">Odak</option>
+        <option {% if request.args.get('focus')=='Full Body' %}selected{% endif %}>Full Body</option>
+        <option {% if request.args.get('focus')=='Hybrid' %}selected{% endif %}>Hybrid</option>
+      </select>
+    </div>
+    <div class="col-auto">
+      <a class="btn btn-outline-secondary" href="{{ url_for('sports') }}">Sıfırla</a>
+    </div>
+  </form>
+  <!-- ★ Filter Form Sonu -->
 
 {# ---------------- ÖNERİLENLER ---------------- #}
 {% if recommended_programs %}
@@ -16,8 +40,18 @@
         <div class="card h-100 shadow-sm">
           <div class="card-body">
             <h5 class="card-title">
-              {{ program.name }} <span class="badge bg-info">Önerilen</span>
-            </h5>
+			  {{ program.name }}
+			  {# ↓ Bu satırları ekleyin ↓ #}
+			  {% if program.days_per_week %}
+				<span class="badge bg-secondary ms-1">
+				  <i class="bi {{ 'bi-calendar3' if program.days_per_week==1 else 'bi-calendar3-week' }}"></i>
+				  {{ program.days_per_week }} Günlük
+				</span>
+			  {% endif %}
+			  {% if program.focus_area %}
+				<span class="badge bg-warning text-dark ms-1">{{ program.focus_area }}</span>
+			  {% endif %}
+			</h5>
 
             {#  <<< BU YENİ SATIR  #}
             {% set m = metrics.get(program.id, {'avg':0,'cnt':0,'avg_dur':0,'comp_pct':0}) %}
@@ -71,7 +105,19 @@
     <div class="col">
       <div class="card h-100 shadow-sm">
 		<div class="card-body">
-		  <h5 class="card-title">{{ program.name }}</h5>
+		    <h5 class="card-title">
+			  {{ program.name }}
+			  {# ↓ Bu satırları ekleyin ↓ #}
+			  {% if program.days_per_week %}
+				<span class="badge bg-secondary ms-1">
+				  <i class="bi {{ 'bi-calendar3' if program.days_per_week==1 else 'bi-calendar3-week' }}"></i>
+				  {{ program.days_per_week }} Günlük
+				</span>
+			  {% endif %}
+			  {% if program.focus_area %}
+				<span class="badge bg-warning text-dark ms-1">{{ program.focus_area }}</span>
+			  {% endif %}
+			</h5>
 
 		  {% set m = metrics.get(program.id, {'avg':0,'cnt':0,'avg_dur':0,'comp_pct':0}) %}
 

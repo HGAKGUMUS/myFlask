@@ -1,43 +1,38 @@
 # -*- coding: utf-8 -*-
 """
-NULL meta alanlarını Excel'den doldurur.
-pprograms_enriched.xlsx dosyasını bu betikle aynı klasöre koyun.
-Çalıştır:  python fill_null_meta_from_excel.py
+Program meta alanlarını (days_per_week, focus_area) otomatik doldurur / düzeltir.
+Çalıştır:  python fill_days_focus.py
 """
 
-import pandas as pd
-from pathlib import Path
+import re
 from app import app, db, Program
 
-# ---------------- 1) Excel'i oku ----------------
-BASE_DIR = Path(__file__).parent
-excel_path = BASE_DIR / "pprograms_enriched.xlsx"
-if not excel_path.exists():
-    raise FileNotFoundError(f"Excel bulunamadı: {excel_path}")
+# ---------- Yardımcı kural ----------
+def infer_days(name: str) -> int:
+    """
+    • 'Split A'  → 3
+    • 'Day1' .. 'Day5' → 5
+    • diğerleri → 1
+    """
+    if re.search(r'Split\s*A', name, re.I):
+        return 3
+    if re.search(r'Day\s*[1-5]', name, re.I):
+        return 5
+    return 1
 
-df = pd.read_excel(excel_path)
-
-# ---------------- 2) DB güncelle ----------------
-updated_rows = 0
+updated = 0
 
 with app.app_context():
-    for _, row in df.iterrows():
-        prog = Program.query.filter_by(name=row["name"]).first()
-        if not prog:
-            continue  # Excel'de olup DB'de olmayan satır — atla
+    for prog in Program.query.all():
+        d = infer_days(prog.name)
+        f = "Full Body" if d == 1 else "Hybrid"
 
-        # Her alan için: eğer DB'de NULL ise Excel'deki değeri yaz
-        if prog.days_per_week is None and not pd.isna(row.get("days_per_week")):
-            prog.days_per_week = int(row["days_per_week"])
-        if not prog.focus_area and isinstance(row.get("focus_area"), str):
-            prog.focus_area = row["focus_area"]
-        if not prog.program_group and isinstance(row.get("program_group"), str):
-            prog.program_group = row["program_group"]
-        if getattr(prog, "weeks_total", None) is None and "weeks_total" in row and not pd.isna(row["weeks_total"]):
-            prog.weeks_total = int(row["weeks_total"])
-
-        updated_rows += 1
+        # Yalnızca bir şey değişirse yaz
+        if prog.days_per_week != d or prog.focus_area != f:
+            prog.days_per_week = d
+            prog.focus_area   = f
+            updated += 1
 
     db.session.commit()
 
-print(f"✅ Güncellendi (NULL → değer yazılan satır sayısı): {updated_rows}")
+print(f"✅ Güncellenen satır sayısı: {updated}")

@@ -609,23 +609,29 @@ def sports():
         return redirect(url_for("login"))
 
     user = User.query.get(user_id)
-    if not user or not user.profile:
-        flash("Profil bilgileriniz eksik. Lütfen profilinizi güncelleyin.")
-        return redirect(url_for("home"))
 
+    # ——— yeni GET parametreleri ———
+    days  = request.args.get("days")      # "1" | "3" | "5"
+    focus = request.args.get("focus")     # "Full Body" | "Hybrid"
 
-
-    show_all = request.args.get("show_all", "false").lower() == "true"
     query = Program.query
-    if not show_all:
-        auto_gender = user.profile.gender or "unisex"
-        auto_level = (user.profile.experience_level or "").strip()
-        query = query.filter(or_(Program.gender == auto_gender,
-                                 Program.gender == "unisex"))
-        if auto_level:
-            query = query.filter(func.lower(Program.level) == auto_level.lower())
 
-    programs = query.order_by(Program.name).all()
+    # mevcuttaki cinsiyet + seviye filtresi bozulmadan kalsın
+    auto_gender = user.profile.gender or "unisex"
+    auto_level  = (user.profile.experience_level or "").lower()
+    query = query.filter(
+        (Program.gender == auto_gender) | (Program.gender == "unisex")
+    )
+    if auto_level:
+        query = query.filter(func.lower(Program.level) == auto_level)
+
+    # ——— yeni filtreler ———
+    if days:
+        query = query.filter(Program.days_per_week == int(days))
+    if focus:
+        query = query.filter(Program.focus_area == focus)
+
+    programs = query.order_by(Program.level, Program.name).all()
 
     # — ÖNERİLENLER —
     recommended_programs = recommend_for_user(user)
