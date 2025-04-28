@@ -1,0 +1,47 @@
+[33mcommit 2a670efb6e7e52012159529a16ed7f2aa161f720[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmaster[m[33m, [m[1;31morigin/master[m[33m)[m
+Author: Hüseyin Gökhan AKGÜMÜŞ <hgokhanakgumus@hotmail.com>
+Date:   Mon Apr 28 14:35:55 2025 +0300
+
+    Projenin fix ekleme
+
+[33mcommit e27b17bc0534c1141ea83d35af36afd0331c27b2[m
+Author: Hüseyin Gökhan AKGÜMÜŞ <hgokhanakgumus@hotmail.com>
+Date:   Sat Apr 5 22:05:25 2025 +0300
+
+    numpy ve pandas versiyonları güncellendi
+
+[33mcommit a5e5f9efe6b1dfa20dbfe71ca210790e340cfd72[m
+Author: Hüseyin Gökhan AKGÜMÜŞ <hgokhanakgumus@hotmail.com>
+Date:   Sat Apr 5 21:20:02 2025 +0300
+
+    Tüm dosyalar push için güncellendi
+
+[33mcommit 2112ab7fd5c12351e29b70ce9037b02b014e3bf6[m
+Author: Hüseyin Gökhan AKGÜMÜŞ <hgokhanakgumus@hotmail.com>
+Date:   Sat Apr 5 21:13:42 2025 +0300
+
+    Tüm dosyalar push için güncellendi
+
+[33mcommit 8f544115ecac573e84f84eda50d9acdd94f28a77[m
+Author: Hüseyin Gökhan AKGÜMÜŞ <hgokhanakgumus@hotmail.com>
+Date:   Sat Apr 5 21:09:22 2025 +0300
+
+    Tüm dosyalar push için güncellendi
+
+[33mcommit 966c0075a688106bd88553f6e10f711d8edd503b[m
+Author: Hüseyin Gökhan AKGÜMÜŞ <hgokhanakgumus@hotmail.com>
+Date:   Sat Apr 5 19:29:26 2025 +0300
+
+    Tüm dosyalar push için güncellendi
+
+[33mcommit ee2d06004da9878efe3e35ce2cc146782ef8f24c[m
+Author: Hüseyin Gökhan AKGÜMÜŞ <hgokhanakgumus@hotmail.com>
+Date:   Tue Mar 18 20:05:41 2025 +0300
+
+    Update requirements.txt: format düzenlendi
+
+[33mcommit db171f87155dacf0e3a9608a9cb293964f505452[m
+Author: Hüseyin Gökhan AKGÜMÜŞ <hgokhanakgumus@hotmail.com>
+Date:   Tue Mar 18 19:45:19 2025 +0300
+
+    İlk commit: Proje dosyaları eklendi
