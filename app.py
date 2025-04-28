@@ -680,7 +680,13 @@ def sports():
     # ——— 2. adım: başlanan ve puanlanan program ID’leri ———
     started_ids = {up.program_id for up in user.user_programs}
     rated_ids   = {upr.program_id for upr in user.user_program_ratings}
-
+    # Başlanan program ID’leri (mevcut ilişki üzerinden)
+    started_ids = {up.program_id for up in user.user_programs}
+    # Puanlanan program ID’leri (user.user_program_ratings ilişkisi yok, doğrudan sorgu yapıyoruz)
+    rated_ids = {
+         upr.program_id
+         for upr in UserProgramRating.query.filter_by(user_id=user_id).all()
+     }
     modal_cfg = session.pop("next_step_modal", None)
 
     return render_template(
