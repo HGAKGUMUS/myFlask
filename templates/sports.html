@@ -105,32 +105,38 @@
 
           </div>
           <div class="card-footer bg-white border-0">
-               {% if program.id not in started_ids %}
-			     <a href="{{ url_for('choose_program', program_id=program.id) }}" class="btn btn-primary w-100">Programı Başlat</a>
-			 
-			   {% elif program.id not in rated_ids %}
-			     <a href="{{ url_for('rate_program', program_id=program.id) }}" class="btn btn-outline-primary w-100">Bitir ve Puanla</a>
-			     <!-- Quick Rating: sadece henüz puanlanmamışsa göster -->
-			     <a
-			       href="{{ url_for('rate_program', program_id=program.id, quick_rating=5) }}"
-			       class="btn btn-dark text-white fw-bold w-100 mt-2"
-			       data-bs-toggle="tooltip"
-			       title="Hızlı puanlama yap">
-			       Quick Rating
-			     </a>
-			 
-			   {% else %}
-			     <button class="btn btn-success w-100" disabled>Tamamlandı ✔️</button>
-			   {% endif %}
+			  {% if program.id not in started_ids %}
+				<a
+				  href="{{ url_for('choose_program', program_id=program.id) }}"
+				  class="btn btn-primary w-100"
+				  data-bs-toggle="tooltip"
+				  title="Programınızı başlatır; ilerlemenizi takip eder.">
+				  Programı Başlat
+				</a>
 
-            <a
-              href="{{ url_for('rate_program', program_id=program.id, quick_rating=5) }}"
-              class="btn btn-dark text-white fw-bold w-100 mt-2"
-              data-bs-toggle="tooltip"
-              title="Hızlı puanlama yap">
-              Quick Rating
-            </a>
-          </div>
+			  {% elif program.id not in rated_ids %}
+				<a
+				  href="{{ url_for('rate_program', program_id=program.id) }}"
+				  class="btn btn-outline-primary w-100"
+				  data-bs-toggle="tooltip"
+				  title="Programı tamamlayıp puanlama formunu açın.">
+				  Bitir ve Puanla
+				</a>
+				<!-- Quick Rating: sadece henüz puanlanmamışsa göster -->
+				<a
+				  href="{{ url_for('rate_program', program_id=program.id, quick_rating=5) }}"
+				  class="btn btn-dark text-white fw-bold w-100 mt-2"
+				  data-bs-toggle="tooltip"
+				  title="Hızlı puanlama yap">
+				  Quick Rating
+				</a>
+
+			  {% else %}
+				<button class="btn btn-success w-100" disabled>
+				  Tamamlandı ✔️
+				</button>
+			  {% endif %}
+		    </div>
         </div>
       </div>
     {% endfor %}
@@ -212,37 +218,38 @@
           {% endif %}
 
         </div>
-        <div class="card-footer bg-white border-0">
-          {% if program.id not in started_ids %}
-            <a
-              href="{{ url_for('choose_program', program_id=program.id) }}"
-              class="btn btn-primary w-100"
-              data-bs-toggle="tooltip"
-              title="Programınızı başlatır; ilerlemenizi takip eder.">
-              Programı Başlat
-            </a>
-          {% elif program.id not in rated_ids %}
-            <a
-              href="{{ url_for('rate_program', program_id=program.id) }}"
-              class="btn btn-outline-primary w-100"
-              data-bs-toggle="tooltip"
-              title="Programı tamamlayıp puanlama formunu açın.">
-              Bitir ve Puanla
-            </a>
-          {% else %}
-            <button class="btn btn-success w-100" disabled>
-              Tamamlandı ✔️
-            </button>
-          {% endif %}
+		<div class="card-footer bg-white border-0">
+		  {% if program.id not in started_ids %}
+			<a
+			  href="{{ url_for('choose_program', program_id=program.id) }}"
+			  class="btn btn-primary w-100"
+			  data-bs-toggle="tooltip"
+			  title="Programınızı başlatır; ilerlemenizi takip eder.">
+			  Programı Başlat
+			</a>
 
-          <a
-            href="{{ url_for('rate_program', program_id=program.id, quick_rating=5) }}"
-            class="btn btn-dark text-white fw-bold w-100 mt-2"
-            data-bs-toggle="tooltip"
-            title="Hızlı puanlama yap">
-            Quick Rating
-          </a>
-        </div>
+		  {% elif program.id not in rated_ids %}
+			<a
+			  href="{{ url_for('rate_program', program_id=program.id) }}"
+			  class="btn btn-outline-primary w-100"
+			  data-bs-toggle="tooltip"
+			  title="Programı tamamlayıp puanlama formunu açın.">
+			  Bitir ve Puanla
+			</a>
+			<!-- Quick Rating: yalnızca henüz puanlanmamış durumda göster -->
+			<a
+			  href="{{ url_for('rate_program', program_id=program.id, quick_rating=5) }}"
+			  class="btn btn-dark text-white fw-bold w-100 mt-2"
+			  data-bs-toggle="tooltip"
+			  title="Hızlı puanlama yap">
+			  Quick Rating
+			</a>
+
+		  {% else %}
+			<button class="btn btn-success w-100" disabled>
+			  Tamamlandı ✔️
+			</button>
+		  {% endif %}
       </div>
     </div>
   {% endfor %}
