@@ -774,9 +774,54 @@ app.jinja_env.globals['program_metrics'] = program_metrics
 def rate_program(program_id):
     user_id = session.get("user_id")
     if not user_id:
-        flash("Puan vermek için önce giriş yapın.")
+        flash("Önce giriş yapmanız gerekir!")
         return redirect(url_for("login"))
 
+    # —————————————  
+    # QUICK RATING desteği: tek tıkla rating, duration ve progress atama
+    quick = request.args.get("quick_rating", type=int)
+    if quick and 1 <= quick <= 5:
+        # 1) Program objesini al
+        program = Program.query.get_or_404(program_id)
+
+        # 2) user_programs tablosuna 'tamamlandı' kaydı at (yoksa)
+        up = UserProgram.query.filter_by(
+            user_id=user_id, program_id=program_id
+        ).first()
+        if not up:
+            up = UserProgram(
+                user_id=user_id,
+                program_id=program_id,
+                start_date=date.today(),
+                progress=100,
+                status="completed"
+            )
+            db.session.add(up)
+
+        # 3) user_program_ratings tablosuna puan, duration ve progress kaydet
+        upr = UserProgramRating.query.filter_by(
+            user_id=user_id, program_id=program_id
+        ).first()
+        if upr:
+            upr.rating   = quick
+            upr.duration = program.duration
+            upr.progress = 100
+        else:
+            upr = UserProgramRating(
+                user_id=user_id,
+                program_id=program_id,
+                rating=quick,
+                duration=program.duration,
+                progress=100
+            )
+            db.session.add(upr)
+
+        db.session.commit()
+        flash(f"Hızlı puanlama kaydedildi: {quick}★")
+        return redirect(url_for("sports"))
+    # —————————————
+
+    # Normal GET / POST akışı
     program = Program.query.get_or_404(program_id)
 
     if request.method == "POST":
@@ -856,6 +901,7 @@ def rate_program(program_id):
 
     # GET isteğinde formu göster
     return render_template("rate_program.html", program=program)
+
 
 
 # --------------------------------------

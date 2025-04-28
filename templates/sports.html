@@ -50,12 +50,12 @@
                 </span>
               {% endif %}
 
-			  {# Odak/Tür rozeti (şimdi focus_area gösteriyor) #}
-			  {% if program.focus_area %}
-			    <span class="badge bg-warning text-dark ms-1">
-			      Tür: {{ program.focus_area }}
-			    </span>
-			  {% endif %}
+              {# Odak/Tür rozeti #}
+              {% if program.focus_area %}
+                <span class="badge bg-warning text-dark ms-1">
+                  Tür: {{ program.focus_area }}
+                </span>
+              {% endif %}
             </h5>
 
             {% set m = metrics.get(program.id, {'avg':0,'cnt':0,'avg_dur':0,'comp_pct':0}) %}
@@ -69,7 +69,7 @@
               <strong>Seviye:</strong> {{ program.level }}<br>
               <strong>Tür:</strong> {{ program.type }}<br>
               <strong>Dinlenme:</strong>
-			  {{ program.recommended_rest or program.rest_intervals or "–" }}<br>
+                {{ program.recommended_rest or program.rest_intervals or "–" }}<br>
               <span>⏱ <em>{{ m.avg_dur }} dk ort. kullanım</em></span> •
               <span>✅ <em>{{ m.comp_pct }}% tamamlama</em></span>
             </p>
@@ -122,6 +122,13 @@
               title="Programı denedikten sonra buradan puan ve sürenizi girin.">
               Deneyimi Değerlendir
             </a>
+            <a
+              href="{{ url_for('rate_program', program_id=program.id, quick_rating=5) }}"
+              class="btn btn-dark text-white fw-bold w-100 mt-2"
+              data-bs-toggle="tooltip"
+              title="Hızlı puanlama yap">
+              Quick Rating
+            </a>
           </div>
         </div>
       </div>
@@ -150,12 +157,12 @@
               </span>
             {% endif %}
 
-			{# Odak/Tür rozeti (şimdi focus_area gösteriyor) #}
-			{% if program.focus_area %}
-			  <span class="badge bg-warning text-dark ms-1">
-			    Tür: {{ program.focus_area }}
-			  </span>
-			{% endif %}
+            {# Odak/Tür rozeti #}
+            {% if program.focus_area %}
+              <span class="badge bg-warning text-dark ms-1">
+                Tür: {{ program.focus_area }}
+              </span>
+            {% endif %}
           </h5>
 
           {% set m = metrics.get(program.id, {'avg':0,'cnt':0,'avg_dur':0,'comp_pct':0}) %}
@@ -168,7 +175,8 @@
           <p class="card-text">
             <strong>Seviye:</strong> {{ program.level }}<br>
             <strong>Tür:</strong> {{ program.type }}<br>
-            <strong>Dinlenme:</strong> {{ program.rest_intervals }}<br>
+            <strong>Dinlenme:</strong>
+              {{ program.recommended_rest or program.rest_intervals or "–" }}<br>
             <span>⏱ <em>{{ m.avg_dur }} dk ort. kullanım</em></span> •
             <span>✅ <em>{{ m.comp_pct }}% tamamlama</em></span>
           </p>
@@ -177,7 +185,7 @@
 
           {# İpucu metni #}
           <small class="text-muted d-block mt-1">
-            İpuçları ve notlar için <i class="bi bi-info-circle text-info fs-5 ms-2" style="cursor:pointer;"></i> ikonuna tıklayın.
+            İpuçları ve notlar için <i class="bi bi-info-circle text-info fs-5 ms-2" style="cursor:pointer;"></i>
           </small>
 
           {# Açılır notlar paneli #}
@@ -220,6 +228,13 @@
             data-bs-toggle="tooltip"
             title="Programı denedikten sonra buradan puan ve sürenizi girin.">
             Deneyimi Değerlendir
+          </a>
+          <a
+            href="{{ url_for('rate_program', program_id=program.id, quick_rating=5) }}"
+            class="btn btn-dark text-white fw-bold w-100 mt-2"
+            data-bs-toggle="tooltip"
+            title="Hızlı puanlama yap">
+            Quick Rating
           </a>
         </div>
       </div>
