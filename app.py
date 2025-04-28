@@ -174,6 +174,18 @@ class Program(db.Model):
     days_per_week = db.Column(db.Integer)        # 1 · 3 · 5
     focus_area    = db.Column(db.String(30))      # Full Body · Split
     weeks_total   = db.Column(db.Integer)         # opsiyonel
+    @property
+    def recommended_rest(self):
+        """
+        notes içinden 'Her set arasında yaklaşık X dinlenme yapın.' cümlesinden
+        sadece X kısmını çeker (örn. '60-90 saniye').
+        """
+        if not self.notes:
+            return None
+        # 'dinlenme' kelimesi öncesindeki metni alıyoruz
+        m = re.search(r"Her set arasında yaklaşık\s+(.+?)\s+dinlenme", self.notes)
+        return m.group(1).strip() if m else None
+
 
 class UserProgramRating(db.Model):
     __tablename__ = 'user_program_ratings'
@@ -207,16 +219,7 @@ class UserProgram(db.Model):
     user = db.relationship('User', backref=db.backref('user_programs', lazy=True))
     program = db.relationship('Program', backref=db.backref('user_programs', lazy=True))
     
-@property
-def recommended_rest(self):
-        """
-        notes içinden “Her set arasında yaklaşık …” cümlesini bulur
-        ve sadece süre kısmını döner (örn. “60-90 saniye”).
-        """
-        if not self.notes:
-            return None
-        m = re.search(r"Her set arasında yaklaşık\s+([^\.]+)\.", self.notes)
-        return m.group(1) if m else None
+
 
 # --------------------------------------
 # Şifre Validasyonu
