@@ -610,7 +610,6 @@ def recommend_for_user(user, limit=6):
     scored.sort(key=lambda x: x[1], reverse=True)
     return [p for p, _ in scored[:limit]]
 
-
 # --------------------------------------
 # SPOR PROGRAMLARI GÖSTERİMİ (SPORTS)
 # --------------------------------------
@@ -627,23 +626,22 @@ def sports():
     days  = request.args.get("days")      # "1" | "3" | "5"
     focus = request.args.get("focus")     # "Full Body" | "Hybrid"
 
-    query = Program.query
-
-    # mevcuttaki cinsiyet + seviye filtresi bozulmadan kalsın
+    # ——— temel sorgu: cinsiyet & seviye filtresi ———
     auto_gender = user.profile.gender or "unisex"
     auto_level  = (user.profile.experience_level or "").lower()
-    query = query.filter(
+    query = Program.query.filter(
         (Program.gender == auto_gender) | (Program.gender == "unisex")
     )
     if auto_level:
         query = query.filter(func.lower(Program.level) == auto_level)
 
-    # ——— yeni filtreler ———
+    # ——— yeni filtreler: gün sayısı & odak ———
     if days:
         query = query.filter(Program.days_per_week == int(days))
     if focus:
         query = query.filter(Program.focus_area == focus)
 
+    # ——— program listesini al ———
     programs = query.order_by(Program.level, Program.name).all()
 
     # — ÖNERİLENLER —
@@ -651,8 +649,8 @@ def sports():
     recommended_ids = {p.id for p in recommended_programs}
     programs = [p for p in programs if p.id not in recommended_ids]
 
-    # ---------- TOPLU METRİK SORGUSU ----------
-    all_ids = {p.id for p in recommended_programs}.union({p.id for p in programs})
+    # ---------- METRİK SORGUSU ----------
+    all_ids = recommended_ids.union({p.id for p in programs})
     metrics = {}
     if all_ids:
         rows = (
@@ -679,6 +677,10 @@ def sports():
             for r in rows
         }
 
+    # ——— 2. adım: başlanan ve puanlanan program ID’leri ———
+    started_ids = {up.program_id for up in user.user_programs}
+    rated_ids   = {upr.program_id for upr in user.user_program_ratings}
+
     modal_cfg = session.pop("next_step_modal", None)
 
     return render_template(
@@ -686,7 +688,9 @@ def sports():
         programs=programs,
         recommended_programs=recommended_programs,
         metrics=metrics,
-        modal_cfg=modal_cfg
+        modal_cfg=modal_cfg,
+        started_ids=started_ids,
+        rated_ids=rated_ids
     )
 
 # --------------------------------------
