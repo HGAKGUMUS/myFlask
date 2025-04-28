@@ -68,7 +68,8 @@
             <p class="card-text">
               <strong>Seviye:</strong> {{ program.level }}<br>
               <strong>Tür:</strong> {{ program.type }}<br>
-              <strong>Dinlenme:</strong> {{ program.rest_intervals }}<br>
+              <strong>Dinlenme:</strong>
+			  {{ program.recommended_rest or program.rest_intervals or "–" }}<br>
               <span>⏱ <em>{{ m.avg_dur }} dk ort. kullanım</em></span> •
               <span>✅ <em>{{ m.comp_pct }}% tamamlama</em></span>
             </p>

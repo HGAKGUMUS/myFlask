@@ -206,6 +206,17 @@ class UserProgram(db.Model):
     
     user = db.relationship('User', backref=db.backref('user_programs', lazy=True))
     program = db.relationship('Program', backref=db.backref('user_programs', lazy=True))
+    
+@property
+def recommended_rest(self):
+        """
+        notes içinden “Her set arasında yaklaşık …” cümlesini bulur
+        ve sadece süre kısmını döner (örn. “60-90 saniye”).
+        """
+        if not self.notes:
+            return None
+        m = re.search(r"Her set arasında yaklaşık\s+([^\.]+)\.", self.notes)
+        return m.group(1) if m else None
 
 # --------------------------------------
 # Şifre Validasyonu
