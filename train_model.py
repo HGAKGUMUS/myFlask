@@ -10,6 +10,7 @@ from sklearn.pipeline import Pipeline
 from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import StandardScaler, OneHotEncoder
 from xgboost import XGBRegressor
+import csv
 
 with app.app_context():
     # 1) Veriyi çek, yeni sütunları da include et
@@ -24,13 +25,15 @@ with app.app_context():
                p.level        AS program_level,
                p.difficulty,
                p.type,
-               p.duration,
+               p.duration           AS program_duration,
+               upr.duration         AS user_duration,
+               upr.progress         AS progress_pct,
                p.days_per_week,
                p.weeks_total,
                p.focus_area
         FROM user_program_ratings upr
         JOIN user_profiles   up ON upr.user_id = up.user_id
-        JOIN programs         p ON upr.program_id = p.id
+        JOIN programs        p  ON upr.program_id = p.id
     """, engine)
 
     print(f"Veri seti boyutu: {df.shape}")
@@ -40,9 +43,21 @@ with app.app_context():
         print("⚠️ 10’dan az kayıt var → model eğitimi atlandı.")
         exit()
 
-    # 3) Pipeline: yeni feature’lar ekli
+    # 3) Ek feature: experience_diff
+    # experience_level'i sayısala çevir
+    df["exp_level_num"] = df["experience_level"].map({
+        "Beginner": 0,
+        "Intermediate": 1,
+        "Advanced": 2
+    })
+    # Zorluk ile seviye arasındaki fark
+    df["experience_diff"] = df["difficulty"] - df["exp_level_num"]
+
+    # 4) Pipeline: feature'lar
     num_cols = [
-        "age", "height", "weight", "duration",
+        "age", "height", "weight",
+        "program_duration", "user_duration", "progress_pct",
+        "experience_diff",
         "days_per_week", "weeks_total", "difficulty"
     ]
     cat_cols = [
@@ -68,11 +83,11 @@ with app.app_context():
         ))
     ])
 
-    # 4) Split X/y
+    # 5) Split X/y
     X = df.drop("rating", axis=1)
     y = df["rating"]
 
-    # 5) 5-fold CV – RMSE
+    # 6) 5-fold CV – RMSE
     rmse = -cross_val_score(
         pipeline, X, y,
         scoring="neg_root_mean_squared_error",
@@ -80,13 +95,13 @@ with app.app_context():
     ).mean()
     print(f"CV RMSE: {rmse:.4f}")
 
-    # 6) Final fit & kaydet
+    # 7) Final fit & kaydet
     pipeline.fit(X, y)
     os.makedirs("models", exist_ok=True)
     joblib.dump(pipeline, "models/fit_pipeline.pkl")
     print("✅ Model kaydedildi → models/fit_pipeline.pkl")
 
-    # 7) Metrics kaydet
+    # 8) Metrics kaydet
     metrics = {
         "rmse": float(rmse),
         "trained_at": datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
@@ -94,3 +109,18 @@ with app.app_context():
     with open(os.path.join("models", "metrics.json"), "w") as f:
         json.dump(metrics, f)
     print(f"ℹ️ Metrics updated: {metrics}")
+
+    # 9) RMSE log kaydı
+    log_path = "training_log.csv"
+    header = ["timestamp", "num_ratings", "rmse"]
+    if not os.path.exists(log_path):
+        with open(log_path, "w", newline="") as f:
+            writer = csv.writer(f)
+            writer.writerow(header)
+
+    num_ratings = df.shape[0]
+    with open(log_path, "a", newline="") as f:
+        writer = csv.writer(f)
+        writer.writerow([datetime.utcnow().isoformat(), num_ratings, rmse])
+
+    print(f"📊 Log kaydedildi: {log_path}")
