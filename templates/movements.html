@@ -39,25 +39,25 @@
   <!-- DataTables JS -->
   <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
   <script>
-    $(document).ready(function() {
-      $('#movementsTable').DataTable({
-        paging:       true,
-        pageLength:   10,
-        ordering:     true,
-        order:        [[0, 'asc']],
-        searching:    true,
-        language: {
-          search:       "Ara:",
-          lengthMenu:   "Sayfada _MENU_ satır göster",
-          info:         "Gösterilen _START_ - _END_ / _TOTAL_ hareket",
-          paginate: {
-            first:    "İlk",
-            last:     "Son",
-            next:     "Sonraki",
-            previous: "Önceki"
-          }
-        }
-      });
-    });
+	$(document).ready(function() {
+	  $('#movementsTable').DataTable({
+		paging:       true,
+		pageLength:   25,       // Sayfa başına 25 satır
+		lengthChange: false,    // Dropdown’u gizler (opsiyonel)
+		ordering:     true,
+		order:        [[0, 'asc']],
+		searching:    true,
+		language: {
+		  search:       "Ara:",
+		  info:         "Gösterilen _START_ - _END_ / _TOTAL_ hareket",
+		  paginate: {
+			first:    "İlk",
+			last:     "Son",
+			next:     "Sonraki",
+			previous: "Önceki"
+		  }
+		}
+	  });
+	});
   </script>
 {% endblock %}
