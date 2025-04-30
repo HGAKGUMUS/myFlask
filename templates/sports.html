@@ -4,30 +4,33 @@
 {% block content %}
 
   <!-- Başlık ve Filtre Formu -->
-  <div class="d-flex justify-content-between align-items-center mb-4">
-    <h2 class="soru-metni mb-0">Spor Programları</h2>
-    <form class="row g-2">
-      <div class="col-auto">
-        <select name="days" class="form-select" onchange="this.form.submit()">
-          <option value="">Gün sayısı</option>
-          {% for d in [1,3,5] %}
-            <option value="{{ d }}" {{ 'selected' if request.args.get('days') == d|string }}>{{ d }} Günlük</option>
-          {% endfor %}
-        </select>
-      </div>
-      <div class="col-auto">
-        <select name="focus" class="form-select" onchange="this.form.submit()">
-          <option value="">Program Türü</option>
-          <option value="Full Body" {% if request.args.get('focus')=='Full Body' %}selected{% endif %}>Full Body</option>
-          <option value="Hybrid"    {% if request.args.get('focus')=='Hybrid'    %}selected{% endif %}>Hybrid</option>
-          <option value="Single Region" {% if request.args.get('focus')=='Single Region' %}selected{% endif %}>Single Region</option>
-        </select>
-      </div>
-      <div class="col-auto">
-        <a class="btn btn-outline-secondary" href="{{ url_for('sports') }}">Sıfırla</a>
-      </div>
-    </form>
-  </div>
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h2 class="soru-metni mb-0">Spor Programları</h2>
+  <form method="get" class="d-flex align-items-center">
+    <!-- Pasif Filtre Başlığı -->
+    <span class="text-muted me-2">Filtrele:</span>
+
+    <!-- Gün Sayısı -->
+    <select name="days" class="form-select me-2" onchange="this.form.submit()">
+      <option value="">Gün sayısı</option>
+      {% for d in [1,3,5] %}
+        <option value="{{ d }}" {{ 'selected' if request.args.get('days') == d|string }}>{{ d }} Günlük</option>
+      {% endfor %}
+    </select>
+
+    <!-- Program Türü -->
+    <select name="focus" class="form-select me-2" onchange="this.form.submit()">
+      <option value="">Program Türü</option>
+      <option value="Full Body"      {% if request.args.get('focus')=='Full Body'      %}selected{% endif %}>Full Body</option>
+      <option value="Hybrid"         {% if request.args.get('focus')=='Hybrid'         %}selected{% endif %}>Hybrid</option>
+      <option value="Single Region" {% if request.args.get('focus')=='Single Region' %}selected{% endif %}>Single Region</option>
+    </select>
+
+    <!-- Sıfırla Butonu -->
+    <a class="btn btn-outline-secondary" href="{{ url_for('sports') }}">Sıfırla</a>
+  </form>
+</div>
+
 
   {# ---------------- ÖNERİLENLER ---------------- #}
   {% if recommended_programs %}
