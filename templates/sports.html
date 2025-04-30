@@ -20,6 +20,7 @@
           <option value="">Program Türü</option>
           <option value="Full Body" {% if request.args.get('focus')=='Full Body' %}selected{% endif %}>Full Body</option>
           <option value="Hybrid"    {% if request.args.get('focus')=='Hybrid'    %}selected{% endif %}>Hybrid</option>
+          <option value="Single Region" {% if request.args.get('focus')=='Single Region' %}selected{% endif %}>Single Region</option>
         </select>
       </div>
       <div class="col-auto">
@@ -38,27 +39,19 @@
             <div class="card-body">
               <h5 class="card-title">
                 {{ program.name }}
-
-                {# Günlük rozeti #}
                 {% if program.days_per_week %}
                   <span class="badge border-secondary text-secondary ms-1">
                     <i class="bi {{ program.days_per_week == 1 and 'bi-calendar3' or 'bi-calendar3-week' }}"></i>
                     {{ program.days_per_week }} Günlük
                   </span>
                 {% endif %}
-
-                {# Tür rozeti #}
                 {% if program.focus_area %}
                   <span class="badge bg-warning text-dark ms-1">Tür: {{ program.focus_area }}</span>
                 {% endif %}
               </h5>
 
               {% set m = metrics.get(program.id, {'avg':0,'cnt':0,'avg_dur':0,'comp_pct':0}) %}
-
-              <p class="mb-1">
-                ⭐ {{ "%.1f"|format(m.avg) }} / 5
-                <span class="text-muted">({{ m.cnt }} oy)</span>
-              </p>
+              <p class="mb-1">⭐ {{ "%.1f"|format(m.avg) }} / 5 <span class="text-muted">({{ m.cnt }} oy)</span></p>
 
               <p class="card-text">
                 <strong>Seviye:</strong> {{ program.level }}<br>
@@ -69,7 +62,7 @@
 
               <p class="small text-muted">{{ program.exercise_steps or "Bilgi yok." }}</p>
 
-             {# Notlar için collapse tetikleyici #}
+              {# Notlar collapse ikonu #}
               <p class="small text-muted mb-1">
                 İpuçları ve notlar için
                 <i class="bi bi-info-circle text-info"
@@ -80,34 +73,22 @@
                    aria-controls="note-{{ program.id }}"></i>
                 ikonuna tıklayın.
               </p>
- 
               {% if program.notes %}
                 <div class="collapse mt-2" id="note-{{ program.id }}">
                   <div class="card border-info bg-info bg-opacity-10 small">
                     <div class="card-body p-2">
                       <h6 class="text-danger mb-1">Açıklama</h6>
-                     <p class="mb-0">{{ program.notes }}</p>
+                      <p class="mb-0">{{ program.notes }}</p>
                     </div>
                   </div>
                 </div>
-             {% endif %}
-
+              {% endif %}
+            </div>
             <div class="card-footer bg-white border-0">
               {% if program.id not in started_ids %}
-                <a href="{{ url_for('choose_program', program_id=program.id) }}"
-                   class="btn btn-primary w-100"
-                   data-bs-toggle="tooltip"
-                   title="Programınızı başlatır; ilerlemenizi takip eder.">
-                  Programı Başlat
-                </a>
-
-			  {% elif program.id not in rated_ids %}
-				<a href="{{ url_for('rate_program', program_id=program.id) }}"
-				   class="btn btn-outline-primary w-100"
-				   title="Programı tamamlayıp puanlama formunu açın.">
-				  Bitir ve Puanla
-				</a>
-
+                <a href="{{ url_for('choose_program', program_id=program.id) }}" class="btn btn-primary w-100" data-bs-toggle="tooltip" title="Programınızı başlatır; ilerlemenizi takip eder.">Programı Başlat</a>
+              {% elif program.id not in rated_ids %}
+                <a href="{{ url_for('rate_program', program_id=program.id) }}" class="btn btn-outline-primary w-100" title="Programı tamamlayıp puanlama formunu açın.">Bitir ve Puanla</a>
               {% else %}
                 <button class="btn btn-success w-100" disabled>Tamamlandı ✔️</button>
               {% endif %}
@@ -129,7 +110,6 @@
           <div class="card-body">
             <h5 class="card-title">
               {{ program.name }}
-
               {% if program.days_per_week %}
                 <span class="badge border-info text-info ms-1">
                   <i class="bi {{ program.days_per_week == 1 and 'bi-calendar3' or 'bi-calendar3-week' }}"></i>
@@ -142,60 +122,42 @@
             </h5>
 
             {% set m = metrics.get(program.id, {'avg':0,'cnt':0,'avg_dur':0,'comp_pct':0}) %}
-
-            <p class="mb-1">
-              ⭐ {{ "%.1f"|format(m.avg) }} / 5
-              <span class="text-muted">({{ m.cnt }} oy)</span>
-            </p>
-
+            <p class="mb-1">⭐ {{ "%.1f"|format(m.avg) }} / 5 <span class="text-muted">({{ m.cnt }} oy)</span></p>
             <p class="card-text">
               <strong>Seviye:</strong> {{ program.level }}<br>
               <strong>Dinlenme:</strong> {{ program.recommended_rest or program.rest_intervals or "–" }}<br>
               <span>⏱ <em>{{ m.avg_dur }} dk ort. kullanım</em></span> •
               <span>✅ <em>{{ m.comp_pct }}% tamamlama</em></span>
             </p>
-
             <p class="small text-muted">{{ program.exercise_steps or "Bilgi yok." }}</p>
 
-             {# Notlar için collapse tetikleyici #}
-             <p class="small text-muted mb-1">
-               İpuçları ve notlar için
-               <i class="bi bi-info-circle text-info"
-                  style="cursor:pointer;"
-                  data-bs-toggle="collapse"
-                  data-bs-target="#note-{{ program.id }}"
-                  aria-expanded="false"
-                  aria-controls="note-{{ program.id }}"></i>
-               ikonuna tıklayın.
-             </p>
- 
-             {% if program.notes %}
-               <div class="collapse mt-2" id="note-{{ program.id }}">
-                 <div class="card border-info bg-info bg-opacity-10 small">
-                   <div class="card-body p-2">
-                     <h6 class="text-danger mb-1">Açıklama</h6>
-                     <p class="mb-0">{{ program.notes }}</p>
-                   </div>
-                 </div>
-               </div>
-             {% endif %}
-
+            {# Notlar collapse ikonu #}
+            <p class="small text-muted mb-1">
+              İpuçları ve notlar için
+              <i class="bi bi-info-circle text-info"
+                 style="cursor:pointer;"
+                 data-bs-toggle="collapse"
+                 data-bs-target="#note-{{ program.id }}"
+                 aria-expanded="false"
+                 aria-controls="note-{{ program.id }}"></i>
+              ikonuna tıklayın.
+            </p>
+            {% if program.notes %}
+              <div class="collapse mt-2" id="note-{{ program.id }}">
+                <div class="card border-info bg-info bg-opacity-10 small">
+                  <div class="card-body p-2">
+                    <h6 class="text-danger mb-1">Açıklama</h6>
+                    <p class="mb-0">{{ program.notes }}</p>
+                  </div>
+                </div>
+              </div>
+            {% endif %}
+          </div>
           <div class="card-footer bg-white border-0">
             {% if program.id not in started_ids %}
-              <a href="{{ url_for('choose_program', program_id=program.id) }}"
-                 class="btn btn-primary w-100"
-                 data-bs-toggle="tooltip"
-                 title="Programınızı başlatır; ilerlemenizi takip eder.">
-                Programı Başlat
-              </a>
-
-           {% elif program.id not in rated_ids %}
-             <a href="{{ url_for('rate_program', program_id=program.id) }}"
-                class="btn btn-outline-primary w-100"
-                title="Programı tamamlayıp puanlama formunu açın.">
-               Bitir ve Puanla
-             </a>
-
+              <a href="{{ url_for('choose_program', program_id=program.id) }}" class="btn btn-primary w-100" data-bs-toggle="tooltip" title="Programınızı başlatır; ilerlemenizi takip eder.">Programı Başlat</a>
+            {% elif program.id not in rated_ids %}
+              <a href="{{ url_for('rate_program', program_id=program.id) }}" class="btn btn-outline-primary w-100" title="Programı tamamlayıp puanlama formunu açın.">Bitir ve Puanla</a>
             {% else %}
               <button class="btn btn-success w-100" disabled>Tamamlandı ✔️</button>
             {% endif %}
@@ -206,4 +168,3 @@
   </div>
 
 {% endblock %}
-	
