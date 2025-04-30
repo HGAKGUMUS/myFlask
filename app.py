@@ -220,6 +220,12 @@ class UserProgram(db.Model):
     user = db.relationship('User', backref=db.backref('user_programs', lazy=True))
     program = db.relationship('Program', backref=db.backref('user_programs', lazy=True))
     
+class Movement(db.Model):
+    __tablename__ = "movements"
+    id   = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), unique=True, nullable=False)
+    url  = db.Column(db.String(255))  # boş kalabilir, siz dolduracaksınız
+    
 
 
 # --------------------------------------

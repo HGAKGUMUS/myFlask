@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Hareket Listesi{% endblock %}
+
+{% block content %}
+  <h2 class="soru-metni mb-4">Tüm Hareketler</h2>
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Hareket Adı</th>
+        <th>GIF / Video URL</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for m in movements %}
+        <tr>
+          <td>{{ m.name }}</td>
+          <td>
+            {{ m.url or "" }}
+            <!-- Sonra buraya <a href="{{ m.url }}">link</a> ekleyebilirsiniz -->
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}
