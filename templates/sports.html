@@ -69,31 +69,28 @@
 
               <p class="small text-muted">{{ program.exercise_steps or "Bilgi yok." }}</p>
 
-              {# Notlar için ikon #}
-              <small class="text-muted d-block mt-1">
-                İpuçları ve notlar için <i class="bi bi-info-circle text-info"></i> ikonuna tıklayın.
-              </small>
-
-              {# Açılır not paneli #}
+             {# Notlar için collapse tetikleyici #}
+              <p class="small text-muted mb-1">
+                İpuçları ve notlar için
+                <i class="bi bi-info-circle text-info"
+                   style="cursor:pointer;"
+                   data-bs-toggle="collapse"
+                   data-bs-target="#note-{{ program.id }}"
+                   aria-expanded="false"
+                   aria-controls="note-{{ program.id }}"></i>
+                ikonuna tıklayın.
+              </p>
+ 
               {% if program.notes %}
-                <div class="d-flex justify-content-end">
-                  <i class="bi bi-info-circle text-info fs-5"
-                     style="cursor:pointer;"
-                     data-bs-toggle="collapse"
-                     data-bs-target="#note-{{ program.id }}"
-                     aria-expanded="false"
-                     aria-controls="note-{{ program.id }}"></i>
-                </div>
                 <div class="collapse mt-2" id="note-{{ program.id }}">
                   <div class="card border-info bg-info bg-opacity-10 small">
                     <div class="card-body p-2">
                       <h6 class="text-danger mb-1">Açıklama</h6>
-                      <p class="mb-0">{{ program.notes }}</p>
+                     <p class="mb-0">{{ program.notes }}</p>
                     </div>
                   </div>
                 </div>
-              {% endif %}
-            </div>
+             {% endif %}
 
             <div class="card-footer bg-white border-0">
               {% if program.id not in started_ids %}
@@ -160,29 +157,28 @@
 
             <p class="small text-muted">{{ program.exercise_steps or "Bilgi yok." }}</p>
 
-            <small class="text-muted d-block mt-1">
-              İpuçları ve notlar için <i class="bi bi-info-circle text-info fs-5" style="cursor:pointer;"></i>
-            </small>
-
-            {% if program.notes %}
-              <div class="d-flex justify-content-end">
-                <i class="bi bi-info-circle text-info fs-5"
-                   style="cursor:pointer;"
-                   data-bs-toggle="collapse"
-                   data-bs-target="#note-{{ program.id }}"
-                   aria-expanded="false"
-                   aria-controls="note-{{ program.id }}"></i>
-              </div>
-              <div class="collapse mt-2" id="note-{{ program.id }}">
-                <div class="card border-info bg-info bg-opacity-10 small">
-                  <div class="card-body p-2">
-                    <h6 class="text-danger mb-1">Açıklama</h6>
-                    <p class="mb-0">{{ program.notes }}</p>
-                  </div>
-                </div>
-              </div>
-            {% endif %}
-          </div>
+             {# Notlar için collapse tetikleyici #}
+             <p class="small text-muted mb-1">
+               İpuçları ve notlar için
+               <i class="bi bi-info-circle text-info"
+                  style="cursor:pointer;"
+                  data-bs-toggle="collapse"
+                  data-bs-target="#note-{{ program.id }}"
+                  aria-expanded="false"
+                  aria-controls="note-{{ program.id }}"></i>
+               ikonuna tıklayın.
+             </p>
+ 
+             {% if program.notes %}
+               <div class="collapse mt-2" id="note-{{ program.id }}">
+                 <div class="card border-info bg-info bg-opacity-10 small">
+                   <div class="card-body p-2">
+                     <h6 class="text-danger mb-1">Açıklama</h6>
+                     <p class="mb-0">{{ program.notes }}</p>
+                   </div>
+                 </div>
+               </div>
+             {% endif %}
 
           <div class="card-footer bg-white border-0">
             {% if program.id not in started_ids %}
