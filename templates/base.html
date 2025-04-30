@@ -42,6 +42,7 @@
           {% if session.get("user_id") %}
             <li class="nav-item"><a class="nav-link" href="{{ url_for('home') }}">Ana Sayfa</a></li>
             <li class="nav-item"><a class="nav-link" href="{{ url_for('sports') }}">Spor Programları</a></li>
+			<li class="nav-item"><a class="nav-link" href="{{ url_for('movements') }}">Hareketler</a></li>
             <li class="nav-item"><a class="nav-link" href="{{ url_for('profile') }}">Profil</a></li>
             <li class="nav-item"><a class="nav-link" href="{{ url_for('logout') }}">Çıkış Yap</a></li>
           {% else %}
