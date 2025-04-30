@@ -1,9 +1,17 @@
 {% extends "base.html" %}
 {% block title %}Hareket Listesi{% endblock %}
 
+{% block head %}
+  <!-- DataTables CSS -->
+  <link
+    rel="stylesheet"
+    href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css"
+  >
+{% endblock %}
+
 {% block content %}
   <h2 class="soru-metni mb-4">Tüm Hareketler</h2>
-  <table class="table">
+  <table id="movementsTable" class="table table-striped">
     <thead>
       <tr>
         <th>Hareket Adı</th>
@@ -12,14 +20,44 @@
     </thead>
     <tbody>
       {% for m in movements %}
-        <tr>
-          <td>{{ m.name }}</td>
-          <td>
-            {{ m.url or "" }}
-            <!-- Sonra buraya <a href="{{ m.url }}">link</a> ekleyebilirsiniz -->
-          </td>
-        </tr>
+      <tr>
+        <td>{{ m.name }}</td>
+        <td>
+          {% if m.url %}
+            <a href="{{ m.url }}" target="_blank">{{ m.url }}</a>
+          {% endif %}
+        </td>
+      </tr>
       {% endfor %}
     </tbody>
   </table>
+{% endblock %}
+
+{% block scripts %}
+  <!-- jQuery (DataTables için gerekli) -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <!-- DataTables JS -->
+  <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+  <script>
+    $(document).ready(function() {
+      $('#movementsTable').DataTable({
+        paging:       true,
+        pageLength:   10,
+        ordering:     true,
+        order:        [[0, 'asc']],
+        searching:    true,
+        language: {
+          search:       "Ara:",
+          lengthMenu:   "Sayfada _MENU_ satır göster",
+          info:         "Gösterilen _START_ - _END_ / _TOTAL_ hareket",
+          paginate: {
+            first:    "İlk",
+            last:     "Son",
+            next:     "Sonraki",
+            previous: "Önceki"
+          }
+        }
+      });
+    });
+  </script>
 {% endblock %}
