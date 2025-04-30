@@ -1,6 +1,7 @@
 import os
 import re
 from datetime import datetime, date, timezone
+from app import Movement
 
 
 from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify
