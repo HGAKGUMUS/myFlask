@@ -658,6 +658,17 @@ def sports():
 
     # — ÖNERİLENLER —
     recommended_programs = recommend_for_user(user)
+    # — Filtreleri önerilen programlara da uygula —
+    if days:
+        recommended_programs = [
+            p for p in recommended_programs
+            if p.days_per_week == int(days)
+        ]
+    if focus:
+        recommended_programs = [
+            p for p in recommended_programs
+            if p.focus_area == focus
+        ]
     recommended_ids = {p.id for p in recommended_programs}
     programs = [p for p in programs if p.id not in recommended_ids]
 
