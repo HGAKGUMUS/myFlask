@@ -227,6 +227,10 @@ class Movement(db.Model):
     url  = db.Column(db.String(255))  # boş kalabilir, siz dolduracaksınız
     
 
+def movements():
+    # veritabanından tüm hareketleri ada göre sırala
+    moves = Movement.query.order_by(Movement.name).all()
+    return render_template("movements.html", movements=moves)
 
 # --------------------------------------
 # Şifre Validasyonu
