@@ -1,7 +1,7 @@
 import os
 import re
 from datetime import datetime, date, timezone
-from app import Movement
+
 
 
 from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify
@@ -227,7 +227,7 @@ class Movement(db.Model):
     name = db.Column(db.String(100), unique=True, nullable=False)
     url  = db.Column(db.String(255))  # boş kalabilir, siz dolduracaksınız
     
-
+@app.route("/movements")
 def movements():
     # veritabanından tüm hareketleri ada göre sırala
     moves = Movement.query.order_by(Movement.name).all()
