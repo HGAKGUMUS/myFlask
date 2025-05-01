@@ -232,6 +232,10 @@ def movements():
     # veritabanından tüm hareketleri ada göre sırala
     moves = Movement.query.order_by(Movement.name).all()
     return render_template("movements.html", movements=moves)
+    
+@app.route('/info')
+def info():
+    return render_template('info.html')    
 
 # --------------------------------------
 # Şifre Validasyonu

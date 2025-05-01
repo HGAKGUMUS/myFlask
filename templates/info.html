@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}Nasıl Kullanılır?{% endblock %}
+{% block content %}
+  <h2 class="mb-4">Bitirme Projesi Kullanım Rehberi</h2>
+
+  <div class="alert alert-secondary mb-4">
+    📌 İstediğiniz hareketi, bir programa başlamadan veya
+    bitirdikten sonra <a href="{{ url_for('movements') }}">Hareketler</a> sayfasından
+    aratıp inceleyebilirsiniz.
+  </div>
+
+  <p>Machine learning modeli için gerçek kullanıcı verilerine ihtiyacımız var! 😊</p>
+  <ol class="mb-4">
+    <li><strong>Kayıt Ol</strong>: Gerekli bilgileri doldurmak için
+        <a href="{{ url_for('register') }}">Kayıt Ol</a> linkine tıklayın.</li>
+    <li><strong>Programlara Göz At</strong>: Seviyenize göre önerilen
+        programları başlık ve süresiyle inceleyin.</li>
+    <li><strong>Seç ve Tamamla</strong>: Bir program seçin, antrenmanı
+        bitirin ve puanlayın.</li>
+    <li><strong>Puan Ver</strong>:
+      <ul>
+        <li>1–5 arası puan ver</li>
+        <li>“Kullanım Süresi (dk)” ve “İlerleme (%)” bilgilerini girin</li>
+      </ul>
+    </li>
+  </ol>
+
+  <h5>Seviye Bazlı Ortalama Yönlendirme</h5>
+  <table class="table table-sm mb-4">
+    <thead>
+      <tr>
+        <th>Seviye</th>
+        <th>Program Süresi (dk)</th>
+        <th>Ortalama İlerleme (%)</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>Beginner</td><td>30 – 35</td><td>80 – 100</td></tr>
+      <tr><td>Intermediate</td><td>40 – 50</td><td>70 – 90</td></tr>
+      <tr><td>Advanced</td><td>55 – 70</td><td>60 – 80</td></tr>
+    </tbody>
+  </table>
+
+  <p class="small text-muted">
+    Not: Kişisel durumunuza ve hızınıza göre süre ve ilerleme değerleri değişebilir.
+  </p>
+{% endblock %}
