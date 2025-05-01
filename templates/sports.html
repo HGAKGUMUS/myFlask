@@ -3,51 +3,91 @@
 
 {% block content %}
 
-  <!-- Başlık ve Filtre Formu -->
-<div class="d-flex justify-content-between align-items-center mb-4">
-  <h2 class="soru-metni mb-0">Spor Programları</h2>
-  <form method="get" class="d-flex align-items-center">
-    <!-- Pasif Filtre Başlığı -->
-    <span class="text-muted me-2">Filtrele:</span>
+  <!-- Başlık ve Filtre Butonu / Formu -->
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="soru-metni mb-0">Spor Programları</h2>
 
-    <!-- Gün Sayısı -->
-    <select name="days" class="form-select me-2" onchange="this.form.submit()">
-      <option value="">Gün sayısı</option>
-      {% for d in [1,3,5] %}
-        <option value="{{ d }}" {{ 'selected' if request.args.get('days') == d|string }}>{{ d }} Günlük</option>
-      {% endfor %}
-    </select>
+    <!-- Mobilde: Offcanvas’ı açan buton -->
+    <button 
+      class="btn btn-outline-secondary d-md-none" 
+      type="button" 
+      data-bs-toggle="offcanvas" 
+      data-bs-target="#filterCanvas"
+      aria-controls="filterCanvas"
+    >
+      <i class="bi bi-funnel-fill"></i> Filtre
+    </button>
 
-    <!-- Program Türü -->
-    <select name="focus" class="form-select me-2" onchange="this.form.submit()">
-      <option value="">Program Türü</option>
-      <option value="Full Body"      {% if request.args.get('focus')=='Full Body'      %}selected{% endif %}>Full Body</option>
-      <option value="Hybrid"         {% if request.args.get('focus')=='Hybrid'         %}selected{% endif %}>Hybrid</option>
-      <option value="Single Region" {% if request.args.get('focus')=='Single Region' %}selected{% endif %}>Single Region</option>
-    </select>
+    <!-- Masaüstünde: Geleneksel form -->
+    <form method="get" class="d-none d-md-flex align-items-center gap-2">
+      <span class="text-muted me-2">Filtrele:</span>
+      <select name="days" class="form-select form-select-sm" onchange="this.form.submit()">
+        <option value="">Gün sayısı</option>
+        {% for d in [1,3,5] %}
+          <option value="{{ d }}" {{ 'selected' if request.args.get('days') == d|string }}>{{ d }} Günlük</option>
+        {% endfor %}
+      </select>
+      <select name="focus" class="form-select form-select-sm" onchange="this.form.submit()">
+        <option value="">Program Türü</option>
+        <option value="Full Body"      {% if request.args.get('focus')=='Full Body'      %}selected{% endif %}>Full Body</option>
+        <option value="Hybrid"         {% if request.args.get('focus')=='Hybrid'         %}selected{% endif %}>Hybrid</option>
+        <option value="Single Region" {% if request.args.get('focus')=='Single Region' %}selected{% endif %}>Single Region</option>
+      </select>
+      <a class="btn btn-outline-secondary btn-sm" href="{{ url_for('sports') }}">Sıfırla</a>
+    </form>
+  </div>
 
-    <!-- Sıfırla Butonu -->
-    <a class="btn btn-outline-secondary" href="{{ url_for('sports') }}">Sıfırla</a>
-  </form>
-</div>
-<!-- Bilgilendirme notu -->
-<div class="alert alert-info py-3 mb-4" role="alert">
-  <p class="mb-2">
-    Single Region programlarımız her antrenmanda yalnızca bir kas grubuna odaklanmanızı sağlar; Full Body ile tüm vücut kaslarınızı çalıştırabilirsiniz.
+  <!-- Offcanvas Filtre Paneli -->
+  <div 
+    class="offcanvas offcanvas-end" 
+    tabindex="-1" 
+    id="filterCanvas" 
+    aria-labelledby="filterCanvasLabel"
+  >
+    <div class="offcanvas-header">
+      <h5 class="offcanvas-title" id="filterCanvasLabel">Filtrele</h5>
+      <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Kapat"></button>
+    </div>
+    <div class="offcanvas-body">
+      <form method="get" class="d-flex flex-column gap-3">
+        <select name="days" class="form-select">
+          <option value="">Gün sayısı</option>
+          {% for d in [1,3,5] %}
+            <option value="{{ d }}" {{ 'selected' if request.args.get('days') == d|string }}>{{ d }} Günlük</option>
+          {% endfor %}
+        </select>
+        <select name="focus" class="form-select">
+          <option value="">Program Türü</option>
+          <option value="Full Body"      {% if request.args.get('focus')=='Full Body'      %}selected{% endif %}>Full Body</option>
+          <option value="Hybrid"         {% if request.args.get('focus')=='Hybrid'         %}selected{% endif %}>Hybrid</option>
+          <option value="Single Region" {% if request.args.get('focus')=='Single Region' %}selected{% endif %}>Single Region</option>
+        </select>
+        <div class="d-flex justify-content-between">
+          <a class="btn btn-outline-secondary w-45" href="{{ url_for('sports') }}">Sıfırla</a>
+          <button type="submit" class="btn btn-primary w-45">Uygula</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Bilgilendirme notu -->
+  <div class="alert alert-info py-3 mb-4" role="alert">
+    <p class="mb-2">
+      Single Region programlarımız her antrenmanda yalnızca bir kas grubuna odaklanmanızı sağlar; Full Body ile tüm vücut kaslarınızı çalıştırabilirsiniz.
+    </p>
+    <p class="mb-2">
+      Hybrid ile hem bölgesel hem de genel çalışmayı bir arada deneyimleyebilirsiniz.
+    </p>
+    <p class="mb-0">
+      Aşağıdaki öneriler ve filtreler ile ihtiyacınıza en uygun programı hızlıca seçip hemen başlayın!
+    </p>
+  </div>
+
+  <!-- Kullanıcıyı yönlendiren kısa not -->
+  <p class="text-muted mb-4 small">
+    Aradığınız program hareketinin adını yazıp 
+    <a href="{{ url_for('movements') }}">Hareketler</a> sayfasından inceleyebilirsiniz.
   </p>
-  <p class="mb-2">
-    Hybrid ile hem bölgesel hem de genel çalışmayı bir arada deneyimleyebilirsiniz.
-  </p>
-  <p class="mb-0">
-    Aşağıdaki öneriler ve filtreler ile ihtiyacınıza en uygun programı hızlıca seçip hemen başlayın!
-  </p>
-</div>
-<!-- Kullanıcıyı yönlendiren kısa not -->
-<p class="text-muted mb-4 small">
-  Aradığınız program hareketinin adını yazıp 
-  <a href="{{ url_for('movements') }}">Hareketler</a> sayfasından inceleyebilirsiniz.
-</p>
-
 
   {# ---------------- ÖNERİLENLER ---------------- #}
   {% if recommended_programs %}
@@ -131,7 +171,7 @@
             <h5 class="card-title">
               {{ program.name }}
               {% if program.days_per_week %}
-                <span class="badge border-info text-info ms-1">
+                <span class="badge border-info text-info ms-1">  
                   <i class="bi {{ program.days_per_week == 1 and 'bi-calendar3' or 'bi-calendar3-week' }}"></i>
                   {{ program.days_per_week }} Günlük
                 </span>
