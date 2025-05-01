@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% block title %}Nasıl Kullanılır?{% endblock %}
+
 {% block content %}
   <h2 class="mb-4">Bitirme Projesi Kullanım Rehberi</h2>
 
@@ -10,16 +11,14 @@
   </div>
 
   <p>Machine learning modeli için gerçek kullanıcı verilerine ihtiyacımız var! 😊</p>
+
   <ol class="mb-4">
-    <li><strong>Kayıt Ol</strong>: Gerekli bilgileri doldurmak için
-        <a href="{{ url_for('register') }}">Kayıt Ol</a> linkine tıklayın.</li>
-    <li><strong>Programlara Göz At</strong>: Seviyenize göre önerilen
-        programları başlık ve süresiyle inceleyin.</li>
-    <li><strong>Seç ve Tamamla</strong>: Bir program seçin, antrenmanı
-        bitirin ve puanlayın.</li>
+    <li><strong>Kayıt Ol</strong>: <a href="{{ url_for('register') }}">Kayıt Ol</a> linkine tıklayarak gerekli bilgileri doldurun.</li>
+    <li><strong>Programlara Göz At</strong>: Seviyenize göre önerilen programları başlık ve süresiyle inceleyin.</li>
+    <li><strong>Seç ve Tamamla</strong>: Bir program seçin, antrenmanı bitirin ve puanlayın.</li>
     <li><strong>Puan Ver</strong>:
-      <ul>
-        <li>1–5 arası puan ver</li>
+      <ul class="mb-0">
+        <li>1–5 arası puan verin</li>
         <li>“Kullanım Süresi (dk)” ve “İlerleme (%)” bilgilerini girin</li>
       </ul>
     </li>
