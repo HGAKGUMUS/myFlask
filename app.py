@@ -17,7 +17,6 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
 
 from xgboost import XGBRegressor
-from lightgbm import LGBMRegressor
 from catboost import CatBoostRegressor
 
 import joblib
