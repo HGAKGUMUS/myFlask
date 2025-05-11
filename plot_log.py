@@ -1,21 +1,45 @@
+# plot_log.py  (proje kökündeki dosya)
+
 import pandas as pd
 import matplotlib.pyplot as plt
 
-# training_log.csv dosyasını oku
-log_path = "training_log.csv"
-df_log = pd.read_csv(log_path, parse_dates=["timestamp"])
+# 1) CSV'yi oku
+df = pd.read_csv("training_log.csv")
 
-# Grafik çizimi
-plt.figure(figsize=(8, 5))
-plt.plot(df_log['num_ratings'], df_log['rmse'], marker='o', linestyle='-')
-plt.xlabel('Toplam Rating Sayısı')
-plt.ylabel('CV RMSE')
-plt.title('Model Performansının Rating Sayısına Göre Değişimi')
-plt.grid(True)
+# 2) İstenirse model sırasını sabitle
+order = ["dt", "rf", "xgb", "cat"]
+df["model"] = pd.Categorical(df["model"], categories=order, ordered=True)
+df = df.sort_values("model")
 
-# PNG olarak kaydet ve göster
-output_path = 'rmse_vs_ratings.png'
-plt.savefig(output_path, dpi=150)
+# 3) Model-renk eşlemesi
+color_map = {
+    "dt":  "#1f77b4",   # mavi
+    "rf":  "#ff7f0e",   # turuncu
+    "xgb": "#2ca02c",   # yeşil
+    "cat": "#d62728"    # kırmızı
+}
+colors = df["model"].map(color_map)
+
+# 4) Grafik
+plt.figure(figsize=(6, 4))
+plt.scatter(df["model"], df["rmse"], s=120, c=colors)
+
+# RMSE etiketleri
+for _, row in df.iterrows():
+    plt.text(row["model"], row["rmse"] + 0.005,
+             f"{row['rmse']:.3f}",
+             ha="center", va="bottom", fontsize=8)
+
+plt.xlabel("Model")
+plt.ylabel("CV RMSE")
+
+# Toplam rating sayısını başlığa ekle
+total_ratings = int(df["num_ratings"].iloc[0])
+plt.title(f"Modellerin Karşılaştırması (Toplam Rating Sayısı = {total_ratings})")
+
+plt.grid(True, axis="y", ls="--", alpha=0.4)
+plt.tight_layout()
+
+# 5) Kaydet + göster
+plt.savefig("rmse_vs_models.png", dpi=120)
 plt.show()
-
-print(f"Grafik oluşturuldu ve kaydedildi: {output_path}")
