@@ -60,13 +60,13 @@ def predict_score(user, program):
     if pipeline is None:
         return 0
 
-    # Seviye-string'ini sayıya çevir
+    # String seviye → sayıya çevirme haritası
     exp_map = {"Beginner": 1, "Intermediate": 2, "Advanced": 3}
     user_exp = exp_map.get(user.profile.experience_level, 0)
     prog_exp = exp_map.get(program.level, 0)
 
     feats = {
-        "program_duration": program.duration,
+        "program_duration": program.duration or 0,
         "user_duration": 0,                    # Yeni kullanıcı için 0
         "progress_pct": 0.0,                   # İlerleme yok
         "experience_diff": user_exp - prog_exp,
@@ -79,8 +79,8 @@ def predict_score(user, program):
         "gender": user.profile.gender or "unisex",
         "experience_level": user.profile.experience_level or "",
         "program_level": program.level or "",
-        "type": program.type or ""
-        "focus_area": program.focus_area or ""  # <- Bu satır eklendi
+        "type": program.type or "",
+        "focus_area": program.focus_area or ""  # ← Burada olmalı
     }
 
     return pipeline.predict(pd.DataFrame([feats]))[0]
