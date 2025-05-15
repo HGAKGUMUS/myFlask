@@ -13,6 +13,8 @@ from sqlalchemy.exc import IntegrityError
 
 
 import pandas as pd
+from pandas import DataFrame
+from sqlalchemy.orm import load_only
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
 
@@ -632,12 +634,46 @@ def recommend_for_user(user, limit=6):
 
         return [p for p, _ in q.order_by(func.avg(UserProgramRating.rating).desc()).limit(limit)]
 
-    # ----- ML SIRALAMA -----
-    candidates = Program.query.all()
-    scored = [(p, predict_score(user, p)) for p in candidates]
-    scored.sort(key=lambda x: x[1], reverse=True)
-    return [p for p, _ in scored[:limit]]
+    # ----- ML SIRALAMA: BATCH PREDICTION -----
+    # 1) Seviye haritalaması
+    exp_map = {"Beginner": 1, "Intermediate": 2, "Advanced": 3}
+    user_exp = exp_map.get(user.profile.experience_level, 0)
 
+    # 2) DB’den sadece gerekli sütunları çek
+    programs = Program.query.options(
+        load_only("id", "duration", "days_per_week", "weeks_total",
+                  "difficulty", "level", "type", "focus_area")
+    ).all()
+
+    # 3) Batch için feature kayıtlarını hazırla
+    records = []
+    for p in programs:
+        prog_exp = exp_map.get(p.level, 0)
+        records.append({
+            "program_duration": p.duration or 0,
+            "user_duration": 0,
+            "progress_pct": 0.0,
+            "experience_diff": user_exp - prog_exp,
+            "days_per_week": p.days_per_week or 0,
+            "weeks_total": p.weeks_total or 0,
+            "difficulty": p.difficulty or 0,
+            "age": user.profile.age or 0,
+            "height": float(user.profile.height or 0),
+            "weight": float(user.profile.weight or 0),
+            "gender": user.profile.gender or "unisex",
+            "experience_level": user.profile.experience_level or "",
+            "program_level": p.level or "",
+            "type": p.type or "",
+            "focus_area": p.focus_area or ""
+        })
+
+    # 4) Tek DataFrame → tek predict çağrısı
+    X = DataFrame(records)
+    scores = pipeline.predict(X)
+
+    # 5) Skorlarla eşleştir, sırala ve döndür
+    scored = sorted(zip(programs, scores), key=lambda x: x[1], reverse=True)
+    return [p for p, _ in scored[:limit]]
 # --------------------------------------
 # SPOR PROGRAMLARI GÖSTERİMİ (SPORTS)
 # --------------------------------------
