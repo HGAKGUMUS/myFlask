@@ -34,7 +34,7 @@ from sklearn.linear_model import LinearRegression
 from sklearn.tree import DecisionTreeRegressor
 from sklearn.ensemble import RandomForestRegressor
 
-from tempfile import gettempdir        # dosyanın üst kısmındaki import’lara ekle
+from tempfile import gettempdir        
 
 
 from xgboost import XGBRegressor
@@ -88,7 +88,7 @@ MODELS = {
         loss_function="RMSE",
         task_type="CPU",
         verbose=False,
-        allow_writing_files=False,                    # geçici klasör istemesin
+        allow_writing_files=False,                    
         train_dir=os.path.join(gettempdir(), "cb_info"),
         random_seed=42
     )

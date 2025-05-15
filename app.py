@@ -24,7 +24,7 @@ import json
 from pathlib import Path
 
 # ---------------------------------
-# 0) Model metrics (RMSE & tarih) yükle
+# 0) Model metrics (RMSE & tarih) 
 # ---------------------------------
 METRICS_PATH = Path(__file__).parent / "models" / "metrics.json"
 
@@ -48,7 +48,7 @@ model_metrics = load_model_metrics()
 # Aşağıda app = Flask(...)’den hemen sonra global olarak da kaydediyoruz.
 
 # ---------------------------------
-# Pipeline'ı yükle
+# Pipeline
 # ---------------------------------
 PIPELINE_PATH = os.path.join(os.path.dirname(__file__), "models", "fit_pipeline.pkl")
 pipeline      = joblib.load(PIPELINE_PATH) if os.path.exists(PIPELINE_PATH) else None
@@ -99,7 +99,7 @@ db = SQLAlchemy(app)
 # Helper Fonksiyonu
 # --------------------------------------
 def get_checkbox_values(field):
-    # Checkbox alanından gelen birden fazla değeri liste olarak alır, virgülle ayrılmış string döndürür.
+    
     values = request.form.getlist(field)
     return ",".join(values) if values else None
 
@@ -121,22 +121,21 @@ class UserProfile(db.Model):
     name = db.Column(db.String(100))
     zodiac = db.Column(db.String(50))
     age = db.Column(db.Integer)
-    gender = db.Column(db.String(10))   # female, male, other
+    gender = db.Column(db.String(10))   
     height = db.Column(db.Numeric(5,2))
     weight = db.Column(db.Numeric(5,2))
-    experience_level = db.Column(db.String(20))  # Beginner, Intermediate, Advanced
+    experience_level = db.Column(db.String(20))  
     goals = db.Column(db.Text)
     city_id = db.Column(db.Integer, db.ForeignKey("cities.city_id"))
     district_id = db.Column(db.Integer, db.ForeignKey("districts.district_id"))
     city     = db.relationship("City",     backref="profiles", lazy="joined")
     district = db.relationship("District", backref="profiles", lazy="joined")
-    # Yeni eklenen alanlar:
-    injury_history = db.Column(db.Text)  # Eğer ileride kullanmak isterseniz (HTML'de yer yoksa boş bırakılabilir)
+    injury_history = db.Column(db.Text)  
     surgery_history = db.Column(db.String(100))
     medications = db.Column(db.Text)
     chronic_conditions = db.Column(db.Text)
-    activity_level = db.Column(db.String(20))  # Eğer HTML'de eklenmezse None kalır
-    nutrition = db.Column(db.String(20))       # Eğer HTML'de eklenmezse None kalır
+    activity_level = db.Column(db.String(20))  
+    nutrition = db.Column(db.String(20))       
     supplement_usage = db.Column(db.Text)
     daily_water_intake = db.Column(db.String(20))
 
@@ -173,8 +172,8 @@ class Program(db.Model):
     type = db.Column(db.String(50))      # Program türü (örn. Kardiyo, Ağırlık)
         # 🆕  --- meta sütunları ---
     days_per_week = db.Column(db.Integer)        # 1 · 3 · 5
-    focus_area    = db.Column(db.String(30))      # Full Body · Split
-    weeks_total   = db.Column(db.Integer)         # opsiyonel
+    focus_area    = db.Column(db.String(30))      
+    weeks_total   = db.Column(db.Integer)         
     @property
     def recommended_rest(self):
         """
@@ -224,7 +223,7 @@ class Movement(db.Model):
     __tablename__ = "movements"
     id   = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), unique=True, nullable=False)
-    url  = db.Column(db.String(255))  # boş kalabilir, siz dolduracaksınız
+    url  = db.Column(db.String(255))  # manuel hareketler özelinde tek tek doldurulacak
     
 @app.route("/movements")
 def movements():
@@ -269,25 +268,25 @@ def create_tables():
         db.session.add_all(cities)
         db.session.commit()
 
-        # İstanbul ilçeleri (örnek)
+        # İstanbul ilçeleri (örnek) Kalan ilçeler db ye hard-code atılacaktır.
         istanbul = City.query.filter_by(city_name="Istanbul").first()
         istanbul_districts = ["Kadıköy", "Beşiktaş", "Üsküdar", "Sarıyer", "Bakırköy", "Ataşehir"]
         for dist in istanbul_districts:
             db.session.add(District(city_id=istanbul.city_id, district_name=dist))
         
-        # Ankara ilçeleri (örnek)
+        # Ankara ilçeleri (örnek) Kalan ilçeler db ye hard-code atılacaktır.
         ankara = City.query.filter_by(city_name="Ankara").first()
         ankara_districts = ["Çankaya", "Keçiören", "Altındağ", "Mamak", "Etimesgut"]
         for dist in ankara_districts:
             db.session.add(District(city_id=ankara.city_id, district_name=dist))
         
-        # İzmir ilçeleri (örnek)
+        # İzmir ilçeleri (örnek) Kalan ilçeler db ye hard-code atılacaktır.
         izmir = City.query.filter_by(city_name="Izmir").first()
         izmir_districts = ["Bornova", "Karşıyaka", "Konak", "Buca", "Alsancak"]
         for dist in izmir_districts:
             db.session.add(District(city_id=izmir.city_id, district_name=dist))
         
-        # Eskişehir ilçeleri - sadece "Odunpazarı" ve "Tepebaşı"
+        # Eskişehir ilçeleri (örnek) Kalan ilçeler db ye hard-code atılacaktır.
         eskisehir = City.query.filter_by(city_name="Eskişehir").first()
         eskisehir_districts = ["Odunpazarı", "Tepebaşı"]
         for dist in eskisehir_districts:
@@ -469,7 +468,7 @@ def register():
             except ValueError:
                 errors.append("Yaş sayı olmalıdır.")
         else:
-            age_val = None   # yaş alanını zorunlu tutmuyorsan
+            age_val = None   
 
         # Boy
         if height_str:
@@ -510,7 +509,7 @@ def register():
         )
 
         new_profile = UserProfile(
-            user=new_user,                 # ilişkiyi böyle kurmak daha temiz
+            user=new_user,                 
             name=name,
             zodiac=zodiac,
             age=age_val,
@@ -599,7 +598,7 @@ def home():
     
     
 # --------------------------------------
-# Öneri motoru: <50 puan → eski mantık, aksi hâlde ML sıralama
+# Öneri motoru: <50 puan → eski mantık, aksi hâlde ML sıralama,yeterliyse ML tabanlı öneri döndürür
 # --------------------------------------
 def recommend_for_user(user, limit=6):
     """Veri azsa basit, yeterliyse ML tabanlı öneri döndürür."""
@@ -705,7 +704,7 @@ def sports():
 
     # ——— 2. adım: başlanan ve puanlanan program ID’leri ———
     started_ids = {up.program_id for up in user.user_programs}
- # ——— 2. adım: başlanan ve puanlanan program ID’leri ———
+
 # Kullanıcı puan verdiği programlar:
     rated_ids = {
         upr.program_id
