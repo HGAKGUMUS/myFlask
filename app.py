@@ -59,16 +59,29 @@ pipeline      = joblib.load(PIPELINE_PATH) if os.path.exists(PIPELINE_PATH) else
 def predict_score(user, program):
     if pipeline is None:
         return 0
+
+    # Seviye-string'ini sayıya çevir
+    exp_map = {"Beginner": 1, "Intermediate": 2, "Advanced": 3}
+    user_exp = exp_map.get(user.profile.experience_level, 0)
+    prog_exp = exp_map.get(program.level, 0)
+
     feats = {
-        "age": user.profile.age,
-        "height": float(user.profile.height),
-        "weight": float(user.profile.weight),
-        "duration": program.duration,
-        "gender": user.profile.gender,
-        "experience_level": user.profile.experience_level,
-        "program_level": program.level,
-        "type": program.type
+        "program_duration": program.duration,
+        "user_duration": 0,                    # Yeni kullanıcı için 0
+        "progress_pct": 0.0,                   # İlerleme yok
+        "experience_diff": user_exp - prog_exp,
+        "days_per_week": program.days_per_week or 0,
+        "weeks_total": program.weeks_total or 0,
+        "difficulty": program.difficulty or 0,
+        "age": user.profile.age or 0,
+        "height": float(user.profile.height or 0),
+        "weight": float(user.profile.weight or 0),
+        "gender": user.profile.gender or "unisex",
+        "experience_level": user.profile.experience_level or "",
+        "program_level": program.level or "",
+        "type": program.type or ""
     }
+
     return pipeline.predict(pd.DataFrame([feats]))[0]
 
 
