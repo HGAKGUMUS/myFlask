@@ -80,6 +80,7 @@ def predict_score(user, program):
         "experience_level": user.profile.experience_level or "",
         "program_level": program.level or "",
         "type": program.type or ""
+        "focus_area": program.focus_area or ""  # <- Bu satır eklendi
     }
 
     return pipeline.predict(pd.DataFrame([feats]))[0]
