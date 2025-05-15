@@ -641,9 +641,17 @@ def recommend_for_user(user, limit=6):
 
     # 2) DB’den sadece gerekli sütunları çek
     programs = Program.query.options(
-        load_only("id", "duration", "days_per_week", "weeks_total",
-                  "difficulty", "level", "type", "focus_area")
-    ).all()
+    load_only(
+        Program.id,
+        Program.duration,
+        Program.days_per_week,
+        Program.weeks_total,
+        Program.difficulty,
+        Program.level,
+        Program.type,
+        Program.focus_area
+    )).all()
+    
 
     # 3) Batch için feature kayıtlarını hazırla
     records = []
